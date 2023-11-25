@@ -1,15 +1,14 @@
-package com.grandefirano.signtalk.fragment
+package com.grandefirano.signtalk.recognition
 
 import android.content.Context
-import com.grandefirano.signtalk.DictionaryProvider
-import com.grandefirano.signtalk.argmax
 import com.grandefirano.signtalk.ml.ImageModel
-import com.grandefirano.signtalk.toFloatArray
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class PredictionManager @Inject constructor(
     dictionaryProvider: DictionaryProvider,
     @ApplicationContext appContext: Context,
@@ -19,7 +18,6 @@ class PredictionManager @Inject constructor(
 
     fun predict(sequence: List<List<Float>>) {
         val threshold = 0.5
-
         val floatArray = sequence.toFloatArray()
         val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 30, 1662), DataType.FLOAT32)
         inputFeature.loadArray(floatArray, intArrayOf(1, 30, 1662))

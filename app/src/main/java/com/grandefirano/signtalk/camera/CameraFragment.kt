@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.fragment
+package com.grandefirano.signtalk.camera
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import com.grandefirano.signtalk.PermissionsFragment
 import com.grandefirano.signtalk.databinding.FragmentCameraBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch

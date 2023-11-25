@@ -1,16 +1,17 @@
-package com.grandefirano.signtalk.fragment
+package com.grandefirano.signtalk.camera
 
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
-import com.grandefirano.signtalk.flattenXYZ
-import com.grandefirano.signtalk.flattenXYZV
-import com.grandefirano.signtalk.recognition.LandmarksManager
-import com.grandefirano.signtalk.recognition.dropIrises
-import com.grandefirano.signtalk.recognition.face.FaceLandmarkerResultWrapper
-import com.grandefirano.signtalk.recognition.hand.HandLandmarkerResultWrapper
-import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerResultWrapper
-import com.grandefirano.signtalk.recognition.toXYZ
-import com.grandefirano.signtalk.recognition.toXYZVisibility
+import com.grandefirano.signtalk.landmarks.flattenXYZ
+import com.grandefirano.signtalk.landmarks.flattenXYZV
+import com.grandefirano.signtalk.landmarks.LandmarksManager
+import com.grandefirano.signtalk.landmarks.dropIrises
+import com.grandefirano.signtalk.landmarks.face.FaceLandmarkerResultWrapper
+import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
+import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
+import com.grandefirano.signtalk.landmarks.toXYZ
+import com.grandefirano.signtalk.landmarks.toXYZVisibility
+import com.grandefirano.signtalk.recognition.PredictionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk
+package com.grandefirano.signtalk.camera
 
 import android.content.Context
 import android.graphics.Canvas
@@ -7,15 +7,16 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.grandefirano.signtalk.recognition.face.FaceLandmarkerHelper
-import com.grandefirano.signtalk.recognition.hand.HandLandmarkerHelper
+import com.grandefirano.signtalk.landmarks.face.FaceLandmarkerHelper
+import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerHelper
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
-import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerHelper
+import com.grandefirano.signtalk.R
+import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerHelper
 import kotlin.math.max
 
 class OverlayView(context: Context?, attrs: AttributeSet?) :

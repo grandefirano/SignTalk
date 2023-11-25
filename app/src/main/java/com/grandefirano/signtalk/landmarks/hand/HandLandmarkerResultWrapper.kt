@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.recognition.hand
+package com.grandefirano.signtalk.landmarks.hand
 
 data class HandLandmarkerResultWrapper(
     val handResultBundle: HandLandmarkerHelper.HandResultBundle?,

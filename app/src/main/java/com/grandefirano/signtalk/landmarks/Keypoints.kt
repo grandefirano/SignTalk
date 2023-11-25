@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk
+package com.grandefirano.signtalk.landmarks
 
 data class XYZVKeypoints(
     val x: Float,

@@ -1,8 +1,6 @@
-package com.grandefirano.signtalk.recognition
+package com.grandefirano.signtalk.landmarks
 
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
-import com.grandefirano.signtalk.XYZKeypoints
-import com.grandefirano.signtalk.XYZVKeypoints
 
 fun List<NormalizedLandmark>.dropIrises(): List<NormalizedLandmark> {
     println("WRONGGGGGGGGG ${this.size}")

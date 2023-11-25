@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.recognition.hand
+package com.grandefirano.signtalk.landmarks.hand
 
 import android.content.Context
 import android.os.SystemClock
@@ -10,8 +10,8 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
-import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.GPU_ERROR
-import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.OTHER_ERROR
+import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.GPU_ERROR
+import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.OTHER_ERROR
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

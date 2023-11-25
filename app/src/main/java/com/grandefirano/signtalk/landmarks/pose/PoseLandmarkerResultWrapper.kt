@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.recognition.pose
+package com.grandefirano.signtalk.landmarks.pose
 
 data class PoseLandmarkerResultWrapper(
     val poseResultBundle: PoseLandmarkerHelper.PoseResultBundle?,

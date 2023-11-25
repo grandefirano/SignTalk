@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk
+package com.grandefirano.signtalk.recognition
 
 import javax.inject.Inject
 

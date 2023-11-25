@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.recognition.face
+package com.grandefirano.signtalk.landmarks.face
 
 data class FaceLandmarkerResultWrapper(
     val faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?,

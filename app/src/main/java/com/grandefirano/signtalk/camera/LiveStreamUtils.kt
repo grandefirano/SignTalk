@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.recognition
+package com.grandefirano.signtalk.camera
 
 import android.graphics.Bitmap
 import android.graphics.Matrix

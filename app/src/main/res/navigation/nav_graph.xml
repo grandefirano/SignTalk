@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/permissions_fragment"
-        android:name="com.grandefirano.signtalk.fragment.PermissionsFragment"
+        android:name="com.grandefirano.signtalk.PermissionsFragment"
         android:label="PermissionsFragment">
 
         <action
@@ -34,7 +34,7 @@
 
     <fragment
         android:id="@+id/camera_fragment"
-        android:name="com.grandefirano.signtalk.fragment.CameraFragment"
+        android:name="com.grandefirano.signtalk.camera.CameraFragment"
         android:label="CameraFragment">
 
         <action
