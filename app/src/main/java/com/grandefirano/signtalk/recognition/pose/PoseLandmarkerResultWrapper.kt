@@ -1,23 +1,20 @@
-package com.google.mediapipe.examples.facelandmarker.pose
-
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
-import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
+package com.grandefirano.signtalk.recognition.pose
 
 data class PoseLandmarkerResultWrapper(
-    val poseLandmarkerResult: PoseLandmarkerResult?,
+    val poseResultBundle: PoseLandmarkerHelper.PoseResultBundle?,
     val frameNumber: Int,
-    val finishTimeMilis: Long
 )
 
+fun initPoseLandmarkerResultWrapper(): PoseLandmarkerResultWrapper =
+    PoseLandmarkerResultWrapper(null, 0)
+
 fun PoseLandmarkerResultWrapper.withNewLandmark(
-    poseLandmarkerResult: PoseLandmarkerResult,
-    finishTimeMilis: Long
+    poseResultBundle: PoseLandmarkerHelper.PoseResultBundle
 ): PoseLandmarkerResultWrapper {
     val nextNumber = this.frameNumber.plus(1)
     return this.copy(
-        poseLandmarkerResult = poseLandmarkerResult,
+        poseResultBundle = poseResultBundle,
         frameNumber = nextNumber,
-        finishTimeMilis = finishTimeMilis
     )
 }
 

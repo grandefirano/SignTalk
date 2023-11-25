@@ -4,9 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.SystemClock
 import androidx.camera.core.ImageProxy
-import com.google.mediapipe.examples.facelandmarker.face.FaceLandmarkerHelper
-import com.google.mediapipe.examples.facelandmarker.hand.HandLandmarkerHelper
-import com.google.mediapipe.examples.facelandmarker.pose.PoseLandmarkerHelper
+import com.grandefirano.signtalk.recognition.face.FaceLandmarkerHelper
+import com.grandefirano.signtalk.recognition.hand.HandLandmarkerHelper
+import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerHelper
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.vision.core.RunningMode
 

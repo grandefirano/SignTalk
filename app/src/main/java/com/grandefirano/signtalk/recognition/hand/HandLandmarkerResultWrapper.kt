@@ -1,22 +1,20 @@
-package com.google.mediapipe.examples.facelandmarker.hand
-
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+package com.grandefirano.signtalk.recognition.hand
 
 data class HandLandmarkerResultWrapper(
-    val handLandmarkerResult: HandLandmarkerResult?,
+    val handResultBundle: HandLandmarkerHelper.HandResultBundle?,
     val frameNumber: Int,
-    val finishTimeMilis: Long
 )
 
+fun initHandLandmarkerResultWrapper(): HandLandmarkerResultWrapper =
+    HandLandmarkerResultWrapper(null, 0)
+
 fun HandLandmarkerResultWrapper.withNewLandmark(
-    handLandmarkerResult: HandLandmarkerResult,
-    finishTimeMilis: Long
+    handResultBundle: HandLandmarkerHelper.HandResultBundle,
 ): HandLandmarkerResultWrapper {
     val nextNumber = this.frameNumber.plus(1)
     return this.copy(
-        handLandmarkerResult = handLandmarkerResult,
+        handResultBundle = handResultBundle,
         frameNumber = nextNumber,
-        finishTimeMilis = finishTimeMilis
     )
 }
 

@@ -1,24 +1,19 @@
-package com.google.mediapipe.examples.facelandmarker.face
-
-import com.google.mediapipe.examples.facelandmarker.fragment.CameraFragment
-import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+package com.grandefirano.signtalk.recognition.face
 
 data class FaceLandmarkerResultWrapper(
-    val faceLandmarkerResult: FaceLandmarkerResult?,
+    val faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?,
     val frameNumber: Int,
-    val finishTimeMilis: Long
 )
 
+fun initFaceLandmarkerResultWrapper(): FaceLandmarkerResultWrapper = FaceLandmarkerResultWrapper(null, 0)
+
 fun FaceLandmarkerResultWrapper.withNewLandmark(
-    faceLandmarkerResult: FaceLandmarkerResult,
-    finishTimeMilis: Long
+    faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?
 ): FaceLandmarkerResultWrapper {
     val nextNumber = this.frameNumber.plus(1)
     return this.copy(
-        faceLandmarkerResult = faceLandmarkerResult,
+        faceResultBundle = faceResultBundle,
         frameNumber = nextNumber,
-        finishTimeMilis = finishTimeMilis
     )
 }
 

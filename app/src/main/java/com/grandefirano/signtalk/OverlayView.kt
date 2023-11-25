@@ -1,23 +1,22 @@
-package com.google.mediapipe.examples.facelandmarker
+package com.grandefirano.signtalk
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.grandefirano.signtalk.recognition.face.FaceLandmarkerHelper
+import com.grandefirano.signtalk.recognition.hand.HandLandmarkerHelper
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
-import com.grandefirano.signtalk.R
+import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerHelper
 import kotlin.math.max
-import kotlin.math.min
 
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
@@ -70,7 +69,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     private fun drawPose(canvas: Canvas) {
         resultsPose?.let { poseLandmarkerResult ->
-            val visibilityThreshold = 0.9
+            val visibilityThreshold = 0.8
             for (landmark in poseLandmarkerResult.landmarks()) {
                 for (normalizedLandmark in landmark) {
                     if (normalizedLandmark.visibility().get() > visibilityThreshold) {
@@ -165,33 +164,27 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun setFaceResults(
-        faceLandmarkerResults: FaceLandmarkerResult,
-        imageHeight: Int,
-        imageWidth: Int,
-    ) {
+    fun setFaceResults(faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?) {
         println("HANDYY face result")
-        resultsFace = faceLandmarkerResults
-        setResultsCommon(imageHeight, imageWidth)
+        resultsFace = faceResultBundle?.result
+        faceResultBundle?.let {
+            setResultsCommon(it.inputImageHeight, it.inputImageWidth)
+        }
     }
 
-    fun setPoseResults(
-        poseLandmarkerResults: PoseLandmarkerResult,
-        imageHeight: Int,
-        imageWidth: Int,
-    ) {
-        resultsPose = poseLandmarkerResults
-        setResultsCommon(imageHeight, imageWidth)
+    fun setPoseResults(poseResultBundle: PoseLandmarkerHelper.PoseResultBundle?) {
+        resultsPose = poseResultBundle?.result
+        poseResultBundle?.let {
+            setResultsCommon(it.inputImageHeight, it.inputImageWidth)
+        }
     }
 
-    fun setHandResults(
-        handLandmarkerResults: HandLandmarkerResult,
-        imageHeight: Int,
-        imageWidth: Int,
-    ) {
+    fun setHandResults(handResultBundle: HandLandmarkerHelper.HandResultBundle?) {
         println("HANDYY hand result")
-        resultsHand = handLandmarkerResults
-        setResultsCommon(imageHeight, imageWidth)
+        resultsHand = handResultBundle?.results
+        handResultBundle?.let {
+            setResultsCommon(it.inputImageHeight, it.inputImageWidth)
+        }
     }
 
     private fun setResultsCommon(imageHeight: Int, imageWidth: Int) {

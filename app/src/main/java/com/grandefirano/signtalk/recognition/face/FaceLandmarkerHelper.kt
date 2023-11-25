@@ -1,25 +1,9 @@
-/*
- * Copyright 2023 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *             http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.google.mediapipe.examples.facelandmarker.face
+package com.grandefirano.signtalk.recognition.face
 
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.google.mediapipe.examples.facelandmarker.combined.CombineLandmarkerHelper.Companion.DELEGATE_CPU
 import com.google.mediapipe.examples.facelandmarker.combined.CombineLandmarkerHelper.Companion.GPU_ERROR
 import com.google.mediapipe.examples.facelandmarker.combined.CombineLandmarkerHelper.Companion.OTHER_ERROR
 import com.google.mediapipe.framework.image.MPImage
@@ -28,17 +12,17 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 class FaceLandmarkerHelper(
-    var minFaceDetectionConfidence: Float = DEFAULT_FACE_DETECTION_CONFIDENCE,
-    var minFaceTrackingConfidence: Float = DEFAULT_FACE_TRACKING_CONFIDENCE,
-    var minFacePresenceConfidence: Float = DEFAULT_FACE_PRESENCE_CONFIDENCE,
-    var maxNumFaces: Int = DEFAULT_NUM_FACES,
-    var currentDelegate: Int = DELEGATE_CPU,
     val context: Context,
-    // this listener is only used when running in RunningMode.LIVE_STREAM
-    val faceLandmarkerHelperListener: LandmarkerListener? = null
 ) {
+
+    private val _faceLandmarks: MutableStateFlow<FaceLandmarkerResultWrapper> =
+        MutableStateFlow(initFaceLandmarkerResultWrapper())
+    val faceLandmarks: StateFlow<FaceLandmarkerResultWrapper> = _faceLandmarks
 
     // For this example this needs to be a var so it can be reset on changes.
     // If the Face Landmarker will not change, a lazy val would be preferable.
@@ -67,14 +51,6 @@ class FaceLandmarkerHelper(
         baseOptionBuilder.setDelegate(Delegate.CPU)
         baseOptionBuilder.setModelAssetPath(MP_FACE_LANDMARKER_TASK)
 
-        // Check if runningMode is consistent with faceLandmarkerHelperListener
-
-        if (faceLandmarkerHelperListener == null) {
-            throw IllegalStateException(
-                "faceLandmarkerHelperListener must be set when runningMode is LIVE_STREAM."
-            )
-        }
-
         try {
             val baseOptions = baseOptionBuilder.build()
             // Create an option builder with base options and specific
@@ -82,10 +58,10 @@ class FaceLandmarkerHelper(
             val optionsBuilder =
                 FaceLandmarker.FaceLandmarkerOptions.builder()
                     .setBaseOptions(baseOptions)
-                    .setMinFaceDetectionConfidence(minFaceDetectionConfidence)
-                    .setMinTrackingConfidence(minFaceTrackingConfidence)
-                    .setMinFacePresenceConfidence(minFacePresenceConfidence)
-                    .setNumFaces(maxNumFaces)
+                    .setMinFaceDetectionConfidence(DEFAULT_FACE_DETECTION_CONFIDENCE)
+                    .setMinTrackingConfidence(DEFAULT_FACE_TRACKING_CONFIDENCE)
+                    .setMinFacePresenceConfidence(DEFAULT_FACE_PRESENCE_CONFIDENCE)
+                    .setNumFaces(DEFAULT_NUM_FACES)
                     .setOutputFaceBlendshapes(true)
                     .setRunningMode(runningMode)
 
@@ -100,7 +76,7 @@ class FaceLandmarkerHelper(
             faceLandmarker =
                 FaceLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-            faceLandmarkerHelperListener?.onError(
+            onError(
                 "CCFace Landmarker failed to initialize. See error logs for " +
                         "details"
             )
@@ -110,7 +86,7 @@ class FaceLandmarkerHelper(
             )
         } catch (e: RuntimeException) {
             // This occurs if the model being used does not support GPU
-            faceLandmarkerHelperListener?.onError(
+            onError(
                 "DDFace Landmarker failed to initialize. See error logs for " +
                         "details", GPU_ERROR
             )
@@ -119,6 +95,9 @@ class FaceLandmarkerHelper(
                 "Face Landmarker failed to load model with error: " + e.message
             )
         }
+    }
+    private fun onError(error: String, errorCode: Int = OTHER_ERROR){
+        println("ERROR APP: $error")
     }
 
     // Run face face landmark using MediaPipe Face Landmarker API
@@ -139,24 +118,42 @@ class FaceLandmarkerHelper(
             val finishTimeMs = SystemClock.uptimeMillis()
             val inferenceTime = finishTimeMs - result.timestampMs()
             //TODO change to flow
-            faceLandmarkerHelperListener?.onResults(
-                ResultBundle(
-                    result,
-                    inferenceTime,
-                    input.height,
-                    input.width,
-                    finishTimeMs
-                )
+            //TODO test if frames are not lost here
+            updateFace(
+                FaceResultBundle(
+                result,
+                inferenceTime,
+                input.height,
+                input.width,
+                finishTimeMs
             )
+            )
+
         } else {
-            faceLandmarkerHelperListener?.onEmpty()
+            updateEmptyFace()
+        }
+    }
+
+    private fun updateEmptyFace() {
+        _faceLandmarks.update {
+            it.withNewLandmark(
+                faceResultBundle = null
+            )
+        }
+    }
+
+    private fun updateFace(faceResultBundle: FaceResultBundle) {
+        _faceLandmarks.update {
+            it.withNewLandmark(
+                faceResultBundle = faceResultBundle
+            )
         }
     }
 
     // Return errors thrown during detection to this FaceLandmarkerHelper's
     // caller
     private fun returnLivestreamError(error: RuntimeException) {
-        faceLandmarkerHelperListener?.onError(
+        onError(
             error.message ?: "An unknown error has occurred"
         )
     }
@@ -170,18 +167,11 @@ class FaceLandmarkerHelper(
         const val DEFAULT_NUM_FACES = 1
     }
 
-    data class ResultBundle(
+    data class FaceResultBundle(
         val result: FaceLandmarkerResult,
         val inferenceTime: Long,
         val inputImageHeight: Int,
         val inputImageWidth: Int,
         val timeStampFinish: Long
     )
-
-    interface LandmarkerListener {
-        fun onError(error: String, errorCode: Int = OTHER_ERROR)
-        fun onResults(resultBundle: ResultBundle)
-
-        fun onEmpty() {}
-    }
 }
