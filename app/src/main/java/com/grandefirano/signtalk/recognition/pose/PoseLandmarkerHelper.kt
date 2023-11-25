@@ -14,13 +14,12 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
+import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.GPU_ERROR
+import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.OTHER_ERROR
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
 class PoseLandmarkerHelper(
-    var minPoseDetectionConfidence: Float = DEFAULT_POSE_DETECTION_CONFIDENCE,
-    var minPoseTrackingConfidence: Float = DEFAULT_POSE_TRACKING_CONFIDENCE,
-    var minPosePresenceConfidence: Float = DEFAULT_POSE_PRESENCE_CONFIDENCE,
     val context: Context,
 ) {
 
@@ -69,9 +68,9 @@ class PoseLandmarkerHelper(
             val optionsBuilder =
                 PoseLandmarker.PoseLandmarkerOptions.builder()
                     .setBaseOptions(baseOptions)
-                    .setMinPoseDetectionConfidence(minPoseDetectionConfidence)
-                    .setMinTrackingConfidence(minPoseTrackingConfidence)
-                    .setMinPosePresenceConfidence(minPosePresenceConfidence)
+                    .setMinPoseDetectionConfidence(DEFAULT_POSE_DETECTION_CONFIDENCE)
+                    .setMinTrackingConfidence(DEFAULT_POSE_TRACKING_CONFIDENCE)
+                    .setMinPosePresenceConfidence(DEFAULT_POSE_PRESENCE_CONFIDENCE)
                     .setRunningMode(RunningMode.LIVE_STREAM)
 
             // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
@@ -102,50 +101,6 @@ class PoseLandmarkerHelper(
                 "Image classifier failed to load model with error: " + e.message
             )
         }
-    }
-
-    // Convert the ImageProxy to MP Image and feed it to PoselandmakerHelper.
-    fun detectLiveStream(
-        imageProxy: ImageProxy,
-        isFrontCamera: Boolean
-    ) {
-
-        val frameTime = SystemClock.uptimeMillis()
-
-        // Copy out RGB bits from the frame to a bitmap buffer
-        val bitmapBuffer =
-            Bitmap.createBitmap(
-                imageProxy.width,
-                imageProxy.height,
-                Bitmap.Config.ARGB_8888
-            )
-
-        imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
-        imageProxy.close()
-
-        val matrix = Matrix().apply {
-            // Rotate the frame received from the camera to be in the same direction as it'll be shown
-            postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
-
-            // flip image if user use front camera
-            if (isFrontCamera) {
-                postScale(
-                    -1f,
-                    1f,
-                    imageProxy.width.toFloat(),
-                    imageProxy.height.toFloat()
-                )
-            }
-        }
-        val rotatedBitmap = Bitmap.createBitmap(
-            bitmapBuffer, 0, 0, bitmapBuffer.width, bitmapBuffer.height,
-            matrix, true
-        )
-
-        // Convert the input Bitmap object to an MPImage object to run inference
-        val mpImage = BitmapImageBuilder(rotatedBitmap).build()
-
-        detectAsync(mpImage, frameTime)
     }
 
     // Run pose landmark using MediaPipe Pose Landmarker API
@@ -202,8 +157,6 @@ class PoseLandmarkerHelper(
         const val DEFAULT_POSE_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_PRESENCE_CONFIDENCE = 0.5F
         const val DEFAULT_NUM_POSES = 1
-        const val OTHER_ERROR = 0
-        const val GPU_ERROR = 1
     }
 
     data class PoseResultBundle(

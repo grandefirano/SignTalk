@@ -4,14 +4,14 @@ import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.grandefirano.signtalk.recognition.combined.CombineLandmarkerHelper.Companion.GPU_ERROR
-import com.grandefirano.signtalk.recognition.combined.CombineLandmarkerHelper.Companion.OTHER_ERROR
 import com.google.mediapipe.framework.image.MPImage
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
+import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.GPU_ERROR
+import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.OTHER_ERROR
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -44,7 +44,7 @@ class FaceLandmarkerHelper(
     // that are created on the main thread and used on a background thread, but
     // the GPU delegate needs to be used on the thread that initialized the
     // Landmarker
-    fun setupFaceLandmarker(runningMode: RunningMode) {
+    fun setupFaceLandmarker() {
         // Set general face landmarker options
         val baseOptionBuilder = BaseOptions.builder()
 
@@ -53,26 +53,17 @@ class FaceLandmarkerHelper(
 
         try {
             val baseOptions = baseOptionBuilder.build()
-            // Create an option builder with base options and specific
-            // options only use for Face Landmarker.
-            val optionsBuilder =
-                FaceLandmarker.FaceLandmarkerOptions.builder()
-                    .setBaseOptions(baseOptions)
-                    .setMinFaceDetectionConfidence(DEFAULT_FACE_DETECTION_CONFIDENCE)
-                    .setMinTrackingConfidence(DEFAULT_FACE_TRACKING_CONFIDENCE)
-                    .setMinFacePresenceConfidence(DEFAULT_FACE_PRESENCE_CONFIDENCE)
-                    .setNumFaces(DEFAULT_NUM_FACES)
-                    .setOutputFaceBlendshapes(true)
-                    .setRunningMode(runningMode)
-
-            // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
-            if (runningMode == RunningMode.LIVE_STREAM) {
-                optionsBuilder
-                    .setResultListener(this::returnLivestreamResult)
-                    .setErrorListener(this::returnLivestreamError)
-            }
-
-            val options = optionsBuilder.build()
+            val options = FaceLandmarker.FaceLandmarkerOptions.builder()
+                .setBaseOptions(baseOptions)
+                .setMinFaceDetectionConfidence(DEFAULT_FACE_DETECTION_CONFIDENCE)
+                .setMinTrackingConfidence(DEFAULT_FACE_TRACKING_CONFIDENCE)
+                .setMinFacePresenceConfidence(DEFAULT_FACE_PRESENCE_CONFIDENCE)
+                .setNumFaces(DEFAULT_NUM_FACES)
+                .setOutputFaceBlendshapes(true)
+                .setRunningMode(RunningMode.LIVE_STREAM)
+                .setResultListener(this::returnLivestreamResult)
+                .setErrorListener(this::returnLivestreamError)
+                .build()
             faceLandmarker =
                 FaceLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
@@ -96,7 +87,8 @@ class FaceLandmarkerHelper(
             )
         }
     }
-    private fun onError(error: String, errorCode: Int = OTHER_ERROR){
+
+    private fun onError(error: String, errorCode: Int = OTHER_ERROR) {
         println("ERROR APP: $error")
     }
 
@@ -108,7 +100,6 @@ class FaceLandmarkerHelper(
         // be returned in returnLivestreamResult function
     }
 
-
     // Return the landmark result to this FaceLandmarkerHelper's caller
     private fun returnLivestreamResult(
         result: FaceLandmarkerResult,
@@ -117,16 +108,15 @@ class FaceLandmarkerHelper(
         if (result.faceLandmarks().size > 0) {
             val finishTimeMs = SystemClock.uptimeMillis()
             val inferenceTime = finishTimeMs - result.timestampMs()
-            //TODO change to flow
             //TODO test if frames are not lost here
             updateFace(
                 FaceResultBundle(
-                result,
-                inferenceTime,
-                input.height,
-                input.width,
-                finishTimeMs
-            )
+                    result,
+                    inferenceTime,
+                    input.height,
+                    input.width,
+                    finishTimeMs
+                )
             )
 
         } else {

@@ -4,13 +4,14 @@ import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.grandefirano.signtalk.recognition.combined.CombineLandmarkerHelper.Companion.GPU_ERROR
 import com.google.mediapipe.framework.image.MPImage
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.GPU_ERROR
+import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.OTHER_ERROR
 import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -40,7 +41,7 @@ class HandLandmarkerHelper(
     // that are created on the main thread and used on a background thread, but
     // the GPU delegate needs to be used on the thread that initialized the
     // Landmarker
-    fun setupHandLandmarker(runningMode: RunningMode) {
+    fun setupHandLandmarker() {
         // Set general hand landmarker options
         val baseOptionBuilder = BaseOptions.builder()
 
@@ -52,23 +53,16 @@ class HandLandmarkerHelper(
             val baseOptions = baseOptionBuilder.build()
             // Create an option builder with base options and specific
             // options only use for Hand Landmarker.
-            val optionsBuilder =
-                HandLandmarker.HandLandmarkerOptions.builder()
-                    .setBaseOptions(baseOptions)
-                    .setMinHandDetectionConfidence(DEFAULT_HAND_DETECTION_CONFIDENCE)
-                    .setMinTrackingConfidence(DEFAULT_HAND_TRACKING_CONFIDENCE)
-                    .setMinHandPresenceConfidence(DEFAULT_HAND_PRESENCE_CONFIDENCE)
-                    .setNumHands(DEFAULT_NUM_HANDS)
-                    .setRunningMode(runningMode)
-
-            // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
-            if (runningMode == RunningMode.LIVE_STREAM) {
-                optionsBuilder
-                    .setResultListener(this::returnLivestreamResult)
-                    .setErrorListener(this::returnLivestreamError)
-            }
-
-            val options = optionsBuilder.build()
+            val options = HandLandmarker.HandLandmarkerOptions.builder()
+                .setBaseOptions(baseOptions)
+                .setMinHandDetectionConfidence(DEFAULT_HAND_DETECTION_CONFIDENCE)
+                .setMinTrackingConfidence(DEFAULT_HAND_TRACKING_CONFIDENCE)
+                .setMinHandPresenceConfidence(DEFAULT_HAND_PRESENCE_CONFIDENCE)
+                .setNumHands(DEFAULT_NUM_HANDS)
+                .setRunningMode(RunningMode.LIVE_STREAM)
+                .setResultListener(this::returnLivestreamResult)
+                .setErrorListener(this::returnLivestreamError)
+                .build()
             handLandmarker =
                 HandLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
@@ -138,7 +132,7 @@ class HandLandmarkerHelper(
         )
     }
 
-    private fun onError(error: String, errorCode: Int = PoseLandmarkerHelper.OTHER_ERROR) {
+    private fun onError(error: String, errorCode: Int = OTHER_ERROR) {
         println("ERROR APP: $error")
     }
 

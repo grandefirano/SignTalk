@@ -2,7 +2,6 @@ package com.grandefirano.signtalk.fragment
 
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
-import com.grandefirano.signtalk.recognition.combined.CombineLandmarkerHelper
 import com.grandefirano.signtalk.flattenXYZ
 import com.grandefirano.signtalk.flattenXYZV
 import com.grandefirano.signtalk.recognition.dropIrises
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit
 class CameraViewModel(
     private val landmarksManager: LandmarksManager,
     private val predictionManager: PredictionManager,
-    private val combineLandmarkerHelper: CombineLandmarkerHelper
 ) : ViewModel() {
 
     val backgroundExecutor: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
@@ -122,27 +120,16 @@ class CameraViewModel(
 
     fun setupLandmarkerIfClosed() {
         backgroundExecutor.execute {
-            if (combineLandmarkerHelper.isFaceClose()) {
-                combineLandmarkerHelper.setupFaceLandmarker()
-            }
-            if (combineLandmarkerHelper.isHandClose()) {
-                combineLandmarkerHelper.setupHandLandmarker()
-            }
-            if (combineLandmarkerHelper.isPoseClose()) {
-                combineLandmarkerHelper.setupPoseLandmarker()
-            }
+            landmarksManager.setupLandmarkerIfClosed()
         }
     }
 
     fun cleanLandmarker() {
-        backgroundExecutor.execute { combineLandmarkerHelper.clearLandmarker() }
+        backgroundExecutor.execute { landmarksManager.cleanLandmarker() }
     }
 
     fun detectCombined(imageProxy: ImageProxy) {
-        combineLandmarkerHelper.detectLiveStream(
-            imageProxy = imageProxy,
-            isFrontCamera = true
-        )
+        landmarksManager.detectCombined(imageProxy)
     }
 
     fun shutDownExecutor() {

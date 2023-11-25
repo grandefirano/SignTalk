@@ -37,9 +37,6 @@ class CameraFragment : Fragment() {
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
 
-    /** Blocking ML operations are performed using this executor */
-
-
     override fun onResume() {
         super.onResume()
         // Make sure that all permissions are still present, since the
