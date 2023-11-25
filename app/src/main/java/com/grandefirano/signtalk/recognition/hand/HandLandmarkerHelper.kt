@@ -12,11 +12,13 @@ import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.GPU_ERROR
 import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.OTHER_ERROR
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
-class HandLandmarkerHelper(
-    private val context: Context
+class HandLandmarkerHelper@Inject constructor(
+    @ApplicationContext val context: Context,
 ) {
     val handLandmarks: MutableStateFlow<HandLandmarkerResultWrapper> =
         MutableStateFlow(initHandLandmarkerResultWrapper())

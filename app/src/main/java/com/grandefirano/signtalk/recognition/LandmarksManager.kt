@@ -9,8 +9,9 @@ import com.grandefirano.signtalk.recognition.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerHelper
 import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerResultWrapper
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class LandmarksManager(
+class LandmarksManager @Inject constructor(
     private val faceLandmarkerHelper: FaceLandmarkerHelper,
     private val poseLandmarkerHelper: PoseLandmarkerHelper,
     private val handLandmarkerHelper: HandLandmarkerHelper,

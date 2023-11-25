@@ -12,11 +12,13 @@ import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.GPU_ERROR
 import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.OTHER_ERROR
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
-class PoseLandmarkerHelper(
-    val context: Context,
+class PoseLandmarkerHelper@Inject constructor(
+    @ApplicationContext val context: Context,
 ) {
 
     val poseLandmarks: MutableStateFlow<PoseLandmarkerResultWrapper> =

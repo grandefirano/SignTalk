@@ -5,12 +5,14 @@ import com.grandefirano.signtalk.DictionaryProvider
 import com.grandefirano.signtalk.argmax
 import com.grandefirano.signtalk.ml.ImageModel
 import com.grandefirano.signtalk.toFloatArray
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import javax.inject.Inject
 
-class PredictionManager(
+class PredictionManager @Inject constructor(
     dictionaryProvider: DictionaryProvider,
-    appContext: Context,
+    @ApplicationContext appContext: Context,
 ) {
     private val mlModel = ImageModel.newInstance(appContext)
     private val dictionary = dictionaryProvider.getDictionary()

@@ -12,12 +12,14 @@ import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
 import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.GPU_ERROR
 import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.OTHER_ERROR
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
-class FaceLandmarkerHelper(
-    val context: Context,
+class FaceLandmarkerHelper @Inject constructor(
+    @ApplicationContext val context: Context,
 ) {
 
     private val _faceLandmarks: MutableStateFlow<FaceLandmarkerResultWrapper> =

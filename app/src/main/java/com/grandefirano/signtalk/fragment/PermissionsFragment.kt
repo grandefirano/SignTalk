@@ -10,9 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.grandefirano.signtalk.R
+import dagger.hilt.android.AndroidEntryPoint
 
 private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
 
+@AndroidEntryPoint
 class PermissionsFragment : Fragment() {
 
     private val requestPermissionLauncher =

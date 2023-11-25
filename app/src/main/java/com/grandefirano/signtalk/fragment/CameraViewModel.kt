@@ -11,13 +11,16 @@ import com.grandefirano.signtalk.recognition.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.recognition.pose.PoseLandmarkerResultWrapper
 import com.grandefirano.signtalk.recognition.toXYZ
 import com.grandefirano.signtalk.recognition.toXYZVisibility
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class CameraViewModel(
+@HiltViewModel
+class CameraViewModel @Inject constructor(
     private val landmarksManager: LandmarksManager,
     private val predictionManager: PredictionManager,
 ) : ViewModel() {
