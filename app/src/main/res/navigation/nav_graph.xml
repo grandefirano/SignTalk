@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/permissions_fragment"
-        android:name="com.google.mediapipe.examples.facelandmarker.fragment.PermissionsFragment"
+        android:name="com.grandefirano.signtalk.fragment.PermissionsFragment"
         android:label="PermissionsFragment">
 
         <action

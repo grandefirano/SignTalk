@@ -1,4 +1,4 @@
-package com.google.mediapipe.examples.facelandmarker.combined
+package com.grandefirano.signtalk.recognition.combined
 
 import android.graphics.Bitmap
 import android.graphics.Matrix

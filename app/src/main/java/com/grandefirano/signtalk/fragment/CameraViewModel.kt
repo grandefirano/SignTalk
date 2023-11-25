@@ -2,7 +2,7 @@ package com.grandefirano.signtalk.fragment
 
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
-import com.google.mediapipe.examples.facelandmarker.combined.CombineLandmarkerHelper
+import com.grandefirano.signtalk.recognition.combined.CombineLandmarkerHelper
 import com.grandefirano.signtalk.flattenXYZ
 import com.grandefirano.signtalk.flattenXYZV
 import com.grandefirano.signtalk.recognition.dropIrises

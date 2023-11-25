@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.google.mediapipe.examples.facelandmarker.combined.CombineLandmarkerHelper.Companion.GPU_ERROR
+import com.grandefirano.signtalk.recognition.combined.CombineLandmarkerHelper.Companion.GPU_ERROR
 import com.google.mediapipe.framework.image.MPImage
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
