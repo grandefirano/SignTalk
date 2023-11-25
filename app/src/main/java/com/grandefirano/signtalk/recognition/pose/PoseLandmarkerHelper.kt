@@ -1,21 +1,17 @@
 package com.grandefirano.signtalk.recognition.pose
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import androidx.camera.core.ImageProxy
-import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.MPImage
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
-import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.GPU_ERROR
-import com.grandefirano.signtalk.fragment.LandmarksManager.Companion.OTHER_ERROR
+import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.GPU_ERROR
+import com.grandefirano.signtalk.recognition.LandmarksManager.Companion.OTHER_ERROR
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 

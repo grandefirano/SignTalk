@@ -84,14 +84,12 @@ class CameraFragment : Fragment() {
         lifecycleScope.launch {
             launch {
                 viewModel.combinedLandmarks.collect {
-                    //TODO maybe change to collect when both hands change
                     viewModel.onLandmarkUpdated(it)
                 }
             }
             launch {
                 viewModel.handLandmarks.collect {
                     fragmentCameraBinding.overlay.setHandResults(it.handResultBundle)
-                    // Force a redraw
                     fragmentCameraBinding.overlay.invalidate()
 
                 }
@@ -99,7 +97,6 @@ class CameraFragment : Fragment() {
             launch {
                 viewModel.poseLandmarks.collect {
                     fragmentCameraBinding.overlay.setPoseResults(it.poseResultBundle)
-                    // Force a redraw
                     fragmentCameraBinding.overlay.invalidate()
 
                 }

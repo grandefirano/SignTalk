@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.fragment
+package com.grandefirano.signtalk.recognition
 
 import androidx.camera.core.ImageProxy
 import com.grandefirano.signtalk.recognition.detectLiveStream

@@ -4,6 +4,7 @@ import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
 import com.grandefirano.signtalk.flattenXYZ
 import com.grandefirano.signtalk.flattenXYZV
+import com.grandefirano.signtalk.recognition.LandmarksManager
 import com.grandefirano.signtalk.recognition.dropIrises
 import com.grandefirano.signtalk.recognition.face.FaceLandmarkerResultWrapper
 import com.grandefirano.signtalk.recognition.hand.HandLandmarkerResultWrapper
