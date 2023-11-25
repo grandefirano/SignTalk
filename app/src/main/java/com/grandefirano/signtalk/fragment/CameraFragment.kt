@@ -368,7 +368,7 @@ class CameraFragment : Fragment() {
     private fun extractKeypoints(landmarks: CombinedLandmarks): List<Float> {
         //TODO: CHANGE LOGIC OF OBSERVING SO IT DOESNT STOP HERE FOR THESE, NOW IT DOESNT STOP FOR NON EXISTING HANDS ONLY
         val pose = landmarks.pose.poseLandmarkerResult?.landmarks()?.flatten()?.toXYZVisibility()
-            ?.flattenXYZV() ?: List(33 * 4) { 0f }
+            ?.flattenXYZV().let { if (it.isNullOrEmpty()) List(33 * 4) { 0f } else it }
         val face =
             landmarks.face.faceLandmarkerResult?.faceLandmarks()?.flatten()?.dropIrises()?.toXYZ()
                 ?.flattenXYZ()
@@ -497,6 +497,7 @@ class CameraFragment : Fragment() {
         imageAnalyzer?.targetRotation =
             fragmentCameraBinding.viewFinder.display.rotation
     }
+
     val actions = listOf("hello", "thanks", "iloveyou")
     fun predict(sequence: List<List<Float>>) {
         val threshold = 0.5
@@ -527,7 +528,7 @@ fun <T : Comparable<T>> Iterable<T>.argmax(): Int? {
     return withIndex().maxByOrNull { it.value }?.index
 }
 
-private fun List<NormalizedLandmark>.dropIrises():List<NormalizedLandmark> {
+private fun List<NormalizedLandmark>.dropIrises(): List<NormalizedLandmark> {
     println("WRONGGGGGGGGG ${this.size}")
     val ren = take(468)
     println("WRONGGGGGGGGG ${ren.size}")
