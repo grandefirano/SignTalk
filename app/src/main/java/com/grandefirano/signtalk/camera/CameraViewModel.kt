@@ -2,6 +2,7 @@ package com.grandefirano.signtalk.camera
 
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.grandefirano.signtalk.landmarks.flattenXYZ
 import com.grandefirano.signtalk.landmarks.flattenXYZV
 import com.grandefirano.signtalk.landmarks.LandmarksManager
@@ -15,6 +16,7 @@ import com.grandefirano.signtalk.recognition.PredictionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -41,6 +43,13 @@ class CameraViewModel @Inject constructor(
         }
     private var lastConsumedFrame = ConsumedFrames(0, 0, 0)
     private val lastSequence = mutableListOf<List<Float>>()
+
+
+    init {
+        viewModelScope.launch {
+            predictionManager.generate()
+        }
+    }
 
     fun onLandmarkUpdated(combinedLandmarks: CombinedLandmarks) {
         combinedLandmarks.doWhenAllUpdated {

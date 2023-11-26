@@ -1,8 +1,10 @@
 package com.grandefirano.signtalk.recognition
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
 import com.grandefirano.signtalk.ml.ImageModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
@@ -21,12 +23,9 @@ class PredictionManager @Inject constructor(
     private val dictionary = dictionaryProvider.getDictionary()
 
     //TODO handle the flow below
-    private val _recognizedSentences:MutableStateFlow<MutableList<String>> = MutableStateFlow(mutableListOf())
+    private val _recognizedSentences:MutableStateFlow<MutableList<String>> = MutableStateFlow(mutableStateListOf())
     val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
 
-    init {
-        generate()
-    }
 
     fun predict(sequence: List<List<Float>>) {
         val threshold = 0.5
@@ -44,9 +43,11 @@ class PredictionManager @Inject constructor(
             }
         }
     }
-    fun generate(){
-        for (index in 1.. 10){
+    suspend fun generate(){
+        for (index in 1.. 15){
+            delay(500)
             _recognizedSentences.update { it.apply { add("Item: $index")} }
+
         }
     }
 

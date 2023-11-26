@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,7 +46,18 @@ fun RecognizedSentences(viewModel: RecognitionViewModel = hiltViewModel()) {
 
 @Composable
 fun RecognizedSentencesContent(recognizedSentences: List<String>) {
-    LazyColumn(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    val listState = rememberLazyListState(0)
+    LaunchedEffect(recognizedSentences.size) {
+        println("EEEEE ${recognizedSentences.lastIndex}")
+        if (recognizedSentences.lastIndex > -1) {
+            listState.animateScrollToItem(recognizedSentences.lastIndex)
+        }
+    }
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         itemsIndexed(recognizedSentences) { index, sentence ->
             val fontSize = if (index == recognizedSentences.lastIndex) 30.sp else 20.sp
             Text(text = sentence, fontSize = fontSize)
@@ -102,7 +115,7 @@ fun DotsTyping() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(top = maxOffset.dp)
+        modifier = Modifier.padding(top = maxOffset.dp).padding(top = 8.dp,bottom = 20.dp)
     ) {
         offsets.forEach {
             Dot(it.value)
