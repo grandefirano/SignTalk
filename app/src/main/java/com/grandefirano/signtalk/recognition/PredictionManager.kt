@@ -7,7 +7,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.update
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -26,9 +25,10 @@ class PredictionManager @Inject constructor(
     private val _recognizedSentences:MutableStateFlow<MutableList<String>> = MutableStateFlow(mutableStateListOf())
     val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
 
+    private val threshold = 0.5
 
+    private val lastPredictions = mutableListOf<Int>()
     fun predict(sequence: List<List<Float>>) {
-        val threshold = 0.5
         val floatArray = sequence.toFloatArray()
         val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 30, 1662), DataType.FLOAT32)
         inputFeature.loadArray(floatArray, intArrayOf(1, 30, 1662))
@@ -37,12 +37,45 @@ class PredictionManager @Inject constructor(
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
         maxIndex?.let {
-            if (list[maxIndex] > threshold) {
-                println("GUESS ${dictionary[maxIndex]}")
-                //TODO:
+            updateLastPrediction(maxIndex)
+            checkLastPredictions(maxIndex,list)
+        }
+    }
+
+    private fun updateLastPrediction(prediction: Int) {
+        lastPredictions.add(prediction)
+        if (lastPredictions.size > 10) lastPredictions.removeAt(0)
+    }
+
+    private fun checkLastPredictions(currentIndex: Int, list: List<Float>) {
+        var isEqual = true
+        lastPredictions.forEach {
+            if(currentIndex != it) {
+                isEqual = false
+                return@forEach
+            }
+        }
+        if(isEqual){
+            if (list[currentIndex] > threshold) {
+                val currentSentence = dictionary[currentIndex]
+                if(_recognizedSentences.value.size>0){
+
+                    if(currentSentence!=_recognizedSentences.value.last()){
+                        addSentenceItem(currentSentence)
+                    }
+                }else{
+                    addSentenceItem(currentSentence)
+                }
+                println("GUESS ${dictionary[currentIndex]}")
             }
         }
     }
+
+    private fun addSentenceItem(currentSentence: String) {
+        _recognizedSentences.update { it.apply { add(currentSentence)} }
+    }
+
+
     suspend fun generate(){
         for (index in 1.. 15){
             delay(500)

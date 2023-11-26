@@ -47,7 +47,7 @@ class CameraViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            predictionManager.generate()
+           // predictionManager.generate()
         }
     }
 
