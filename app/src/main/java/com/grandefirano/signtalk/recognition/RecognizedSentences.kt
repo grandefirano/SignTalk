@@ -7,6 +7,7 @@ import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,11 +22,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,16 +41,27 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grandefirano.signtalk.R
+import com.grandefirano.signtalk.camera.CameraViewModel
 import com.grandefirano.signtalk.ui.theme.SignTalkTheme
 
 @Composable
-fun RecognizedSentences(viewModel: RecognitionViewModel = hiltViewModel()) {
+fun RecognizedSentences(viewModel: CameraViewModel = hiltViewModel()) {
     val recognizedSentences by viewModel.recognizedSentences.collectAsStateWithLifecycle()
-    RecognizedSentencesContent(recognizedSentences)
+    val translationChoice by viewModel.translationChoice.collectAsStateWithLifecycle()
+    val onTranslationChange: (TranslationChoice) -> Unit = viewModel::switchTranslation
+    RecognizedSentencesContent(
+        recognizedSentences = recognizedSentences,
+        translationChoice = translationChoice,
+        onTranslationChange = onTranslationChange
+    )
 }
 
 @Composable
-fun RecognizedSentencesContent(recognizedSentences: List<String>) {
+fun RecognizedSentencesContent(
+    recognizedSentences: List<String>,
+    translationChoice: TranslationChoice,
+    onTranslationChange: (TranslationChoice) -> Unit
+) {
     val listState = rememberLazyListState(0)
     LaunchedEffect(recognizedSentences.size) {
         println("EEEEE ${recognizedSentences.lastIndex}")
@@ -53,19 +69,44 @@ fun RecognizedSentencesContent(recognizedSentences: List<String>) {
             listState.animateScrollToItem(recognizedSentences.lastIndex)
         }
     }
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.padding(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        itemsIndexed(recognizedSentences) { index, sentence ->
-            val fontSize = if (index == recognizedSentences.lastIndex) 30.sp else 20.sp
-            Text(text = sentence, fontSize = fontSize)
+    Column(horizontalAlignment = Alignment.CenterHorizontally,modifier = Modifier.fillMaxWidth()) {
+        LanguageSwitch(translationChoice, onTranslationChange)
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            itemsIndexed(recognizedSentences) { index, sentence ->
+                val fontSize = if (index == recognizedSentences.lastIndex) 30.sp else 20.sp
+                Text(text = sentence, fontSize = fontSize)
+            }
+            item {
+                DotsTyping()
+                //Text(text = "...",color = Color.Gray)
+            }
         }
-        item {
-            DotsTyping()
-            //Text(text = "...",color = Color.Gray)
-        }
+    }
+}
+
+@Composable
+fun LanguageSwitch(
+    translationChoice: TranslationChoice,
+    onTranslationChange: (TranslationChoice) -> Unit
+) {
+    println("NEWWW TRANSLATION CHOSEEEN $translationChoice")
+    Row (verticalAlignment = Alignment.CenterVertically) {
+        Text(text = "PJM")
+        Switch(
+            checked = translationChoice == TranslationChoice.ASL_ENGLISH,
+            onCheckedChange = {
+                val newValue = when (translationChoice) {
+                    TranslationChoice.PJM_POLISH -> TranslationChoice.ASL_ENGLISH
+                    TranslationChoice.ASL_ENGLISH -> TranslationChoice.PJM_POLISH
+                }
+                onTranslationChange(newValue)
+            }
+        )
+        Text(text = "ASL")
     }
 }
 
@@ -115,7 +156,9 @@ fun DotsTyping() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(top = maxOffset.dp).padding(top = 8.dp,bottom = 20.dp)
+        modifier = Modifier
+            .padding(top = maxOffset.dp)
+            .padding(top = 8.dp, bottom = 20.dp)
     ) {
         offsets.forEach {
             Dot(it.value)
@@ -133,7 +176,11 @@ fun RecognizedSentencesPreview() {
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.background
         ) {
-            RecognizedSentencesContent(recognizedSentences = recognizedSentences)
+            RecognizedSentencesContent(
+                recognizedSentences = recognizedSentences,
+                translationChoice = TranslationChoice.ASL_ENGLISH,
+                onTranslationChange = {}
+            )
         }
     }
 }

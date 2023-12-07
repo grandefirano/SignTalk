@@ -13,6 +13,7 @@ import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.toXYZ
 import com.grandefirano.signtalk.landmarks.toXYZVisibility
 import com.grandefirano.signtalk.recognition.PredictionManager
+import com.grandefirano.signtalk.recognition.TranslationChoice
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -44,10 +45,19 @@ class CameraViewModel @Inject constructor(
     private var lastConsumedFrame = ConsumedFrames(0, 0, 0)
     private val lastSequence = mutableListOf<List<Float>>()
 
+    val recognizedSentences: StateFlow<List<String>> = predictionManager.recognizedSentences
+    val translationChoice: StateFlow<TranslationChoice> = predictionManager.translationChoice
+
+
+    fun switchTranslation(translationChoice: TranslationChoice) {
+        //TODO: To prevent mixing languages guesses when language is changed
+        lastSequence.clear()
+        predictionManager.switchTranslation(translationChoice)
+
+    }
 
     init {
         viewModelScope.launch {
-           // predictionManager.generate()
         }
     }
 

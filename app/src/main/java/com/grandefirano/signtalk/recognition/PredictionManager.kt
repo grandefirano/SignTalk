@@ -3,10 +3,17 @@ package com.grandefirano.signtalk.recognition
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import com.grandefirano.signtalk.ml.ImageModel
+import com.grandefirano.signtalk.recognition.dictionary.DictionaryLanguage
+import com.grandefirano.signtalk.recognition.dictionary.DictionaryProvider
+import com.grandefirano.signtalk.recognition.dictionary.Interpreter
+import com.grandefirano.signtalk.recognition.dictionary.PredictionInterpreterProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -15,14 +22,23 @@ import javax.inject.Singleton
 
 @Singleton
 class PredictionManager @Inject constructor(
-    dictionaryProvider: DictionaryProvider,
-    @ApplicationContext appContext: Context,
+    private val dictionaryProvider: DictionaryProvider,
+    private val interpreterProvider: PredictionInterpreterProvider,
 ) {
-    private val mlModel = ImageModel.newInstance(appContext)
-    private val dictionary = dictionaryProvider.getDictionary()
+
+    private val _translationChoice: MutableStateFlow<TranslationChoice> =
+        MutableStateFlow(TranslationChoice.PJM_POLISH)
+    val translationChoice: StateFlow<TranslationChoice> = _translationChoice
+
+    private var interpreter: Interpreter =
+        interpreterProvider.getPredictionInterpreter(_translationChoice.value)
+
+    private var dictionaryLanguage: List<String> =
+        dictionaryProvider.getDictionary(_translationChoice.value)
 
     //TODO handle the flow below
-    private val _recognizedSentences:MutableStateFlow<MutableList<String>> = MutableStateFlow(mutableStateListOf())
+    private val _recognizedSentences: MutableStateFlow<MutableList<String>> =
+        MutableStateFlow(mutableStateListOf())
     val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
 
     private val threshold = 0.5
@@ -32,14 +48,19 @@ class PredictionManager @Inject constructor(
         val floatArray = sequence.toFloatArray()
         val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 30, 1662), DataType.FLOAT32)
         inputFeature.loadArray(floatArray, intArrayOf(1, 30, 1662))
-        val outputs = mlModel.process(inputFeature)
-        val outputFeature = outputs.outputFeature0AsTensorBuffer
+        val outputFeature = interpreter.interpret(inputFeature)
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
         maxIndex?.let {
             updateLastPrediction(maxIndex)
-            checkLastPredictions(maxIndex,list)
+            checkLastPredictions(maxIndex, list)
         }
+    }
+
+    fun switchTranslation(translationChoice: TranslationChoice) {
+        _translationChoice.value = translationChoice
+        interpreter = interpreterProvider.getPredictionInterpreter(translationChoice)
+        dictionaryLanguage = dictionaryProvider.getDictionary(translationChoice)
     }
 
     private fun updateLastPrediction(prediction: Int) {
@@ -50,36 +71,36 @@ class PredictionManager @Inject constructor(
     private fun checkLastPredictions(currentIndex: Int, list: List<Float>) {
         var isEqual = true
         lastPredictions.forEach {
-            if(currentIndex != it) {
+            if (currentIndex != it) {
                 isEqual = false
                 return@forEach
             }
         }
-        if(isEqual){
+        if (isEqual) {
             if (list[currentIndex] > threshold) {
-                val currentSentence = dictionary[currentIndex]
-                if(_recognizedSentences.value.size>0){
+                val currentSentence = dictionaryLanguage[currentIndex]
+                if (_recognizedSentences.value.size > 0) {
 
-                    if(currentSentence!=_recognizedSentences.value.last()){
+                    if (currentSentence != _recognizedSentences.value.last()) {
                         addSentenceItem(currentSentence)
                     }
-                }else{
+                } else {
                     addSentenceItem(currentSentence)
                 }
-                println("GUESS ${dictionary[currentIndex]}")
+                println("GUESS ${dictionaryLanguage[currentIndex]}")
             }
         }
     }
 
     private fun addSentenceItem(currentSentence: String) {
-        _recognizedSentences.update { it.apply { add(currentSentence)} }
+        _recognizedSentences.update { it.apply { add(currentSentence) } }
     }
 
 
-    suspend fun generate(){
-        for (index in 1.. 15){
+    suspend fun generate() {
+        for (index in 1..15) {
             delay(500)
-            _recognizedSentences.update { it.apply { add("Item: $index")} }
+            _recognizedSentences.update { it.apply { add("Item: $index") } }
 
         }
     }
