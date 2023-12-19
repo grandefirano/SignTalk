@@ -2,11 +2,16 @@ package com.grandefirano.signtalk.camera
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
+import android.util.Range
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -14,7 +19,6 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -24,6 +28,7 @@ import com.grandefirano.signtalk.PermissionsFragment
 import com.grandefirano.signtalk.databinding.FragmentCameraBinding
 import com.grandefirano.signtalk.recognition.RecognizedSentences
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -96,7 +101,7 @@ class CameraFragment : Fragment() {
             setUpCamera()
         }
         lifecycleScope.launch {
-            launch {
+            launch(Dispatchers.Default) {
                 viewModel.combinedLandmarks.collect {
                     viewModel.onLandmarkUpdated(it)
                 }
@@ -141,6 +146,9 @@ class CameraFragment : Fragment() {
         )
     }
 
+    private var counterXX = 0
+    private var counterXXSaved = 0L
+
     // Declare and bind preview, capture and analysis use cases
     @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraUseCases() {
@@ -152,24 +160,48 @@ class CameraFragment : Fragment() {
         val cameraSelector =
             CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build()
 
+
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
             .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
             .build()
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
-        imageAnalyzer =
+
+
+        val imageAnalyzerBuilder =
             ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                .build()
-                // The analyzer can then be assigned to the instance
-                .also {
-                    it.setAnalyzer(viewModel.backgroundExecutor) { image ->
-                        viewModel.detectCombined(image)
+//        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(imageAnalyzerBuilder)
+//        ext.setCaptureRequestOption(
+//            CaptureRequest.CONTROL_AE_MODE,
+//            CaptureRequest.CONTROL_AE_MODE_OFF
+//        )
+//        ext.setCaptureRequestOption(
+//            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+//            Range<Int>(30, 30)
+//        )
+        //val imageAnalysis = builder.build()
+        imageAnalyzer = imageAnalyzerBuilder.build()
+            // The analyzer can then be assigned to the instance
+            .also {
+                it.setAnalyzer(viewModel.backgroundExecutor) { image ->
+                    //todo here
+                    val finishTimeMs = SystemClock.uptimeMillis()
+                    //TODO test if frames are not lost here
+                    val newXX = finishTimeMs / 1000
+                    if (counterXXSaved == newXX) {
+                        counterXX++
+                    } else {
+                        println("FFFF TIME IN SECCCC $counterXXSaved  frames: $counterXX")
+                        counterXX = 0
+                        counterXXSaved = newXX
                     }
+                    viewModel.detectCombined(image)
                 }
+            }
 
         // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
