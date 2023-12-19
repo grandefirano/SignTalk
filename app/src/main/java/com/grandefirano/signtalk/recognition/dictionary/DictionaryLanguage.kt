@@ -10,5 +10,5 @@ fun getEnglishDictionary(): List<String> {
 }
 
 fun getPolishDictionary(): List<String> {
-    return listOf("Cześć", "Dziękuję", "Przepraszam")
+    return listOf("Dziękuję", "Proszę", "Przepraszam","Do","Od","Jest","Który","Ja","Gdzie","Mam")
 }
