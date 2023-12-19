@@ -103,6 +103,8 @@ class FaceLandmarkerHelper @Inject constructor(
     }
 
     // Return the landmark result to this FaceLandmarkerHelper's caller
+    private var counterXX = 0
+    private var counterXXSaved = 0L
     private fun returnLivestreamResult(
         result: FaceLandmarkerResult,
         input: MPImage
@@ -111,6 +113,15 @@ class FaceLandmarkerHelper @Inject constructor(
             val finishTimeMs = SystemClock.uptimeMillis()
             val inferenceTime = finishTimeMs - result.timestampMs()
             //TODO test if frames are not lost here
+            val newXX = finishTimeMs/1000
+            if(counterXXSaved == newXX){
+                counterXX++
+            }else{
+                println("TIME IN SECCCC $counterXXSaved  frames: $counterXX")
+                counterXX=0
+                counterXXSaved = newXX
+            }
+
             updateFace(
                 FaceResultBundle(
                     result,

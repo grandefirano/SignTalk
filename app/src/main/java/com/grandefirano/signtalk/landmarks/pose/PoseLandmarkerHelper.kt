@@ -115,8 +115,10 @@ class PoseLandmarkerHelper@Inject constructor(
         result: PoseLandmarkerResult,
         input: MPImage
     ) {
+
         val finishTimeMs = SystemClock.uptimeMillis()
         val inferenceTime = finishTimeMs - result.timestampMs()
+        println("INFERENCE TIME POSE: $inferenceTime")
         updatePose(
             PoseResultBundle(
                 result,

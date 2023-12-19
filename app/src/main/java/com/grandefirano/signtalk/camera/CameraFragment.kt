@@ -101,7 +101,7 @@ class CameraFragment : Fragment() {
             setUpCamera()
         }
         lifecycleScope.launch {
-            launch(Dispatchers.Default) {
+            launch {
                 viewModel.combinedLandmarks.collect {
                     viewModel.onLandmarkUpdated(it)
                 }
@@ -120,14 +120,14 @@ class CameraFragment : Fragment() {
 
                 }
             }
-            launch {
-                viewModel.faceLandmarks.collect {
-                    fragmentCameraBinding.overlay.setFaceResults(it.faceResultBundle)
-                    // Force a redraw
-                    fragmentCameraBinding.overlay.invalidate()
-
-                }
-            }
+//            launch {
+//                viewModel.faceLandmarks.collect {
+//                    fragmentCameraBinding.overlay.setFaceResults(it.faceResultBundle)
+//                    // Force a redraw
+//                    fragmentCameraBinding.overlay.invalidate()
+//
+//                }
+//            }
         }
     }
 
@@ -147,6 +147,7 @@ class CameraFragment : Fragment() {
     }
 
     private var counterXX = 0
+    private var counterXX2222 = 0
     private var counterXXSaved = 0L
 
     // Declare and bind preview, capture and analysis use cases
@@ -174,15 +175,15 @@ class CameraFragment : Fragment() {
                 .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-//        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(imageAnalyzerBuilder)
-//        ext.setCaptureRequestOption(
-//            CaptureRequest.CONTROL_AE_MODE,
-//            CaptureRequest.CONTROL_AE_MODE_OFF
-//        )
-//        ext.setCaptureRequestOption(
-//            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-//            Range<Int>(30, 30)
-//        )
+        val ext: Camera2Interop.Extender<*> = Camera2Interop.Extender(imageAnalyzerBuilder)
+        ext.setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_MODE,
+            CaptureRequest.CONTROL_AE_MODE_OFF
+        )
+        ext.setCaptureRequestOption(
+            CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
+            Range<Int>(15, 15)
+        )
         //val imageAnalysis = builder.build()
         imageAnalyzer = imageAnalyzerBuilder.build()
             // The analyzer can then be assigned to the instance
@@ -199,7 +200,11 @@ class CameraFragment : Fragment() {
                         counterXX = 0
                         counterXXSaved = newXX
                     }
-                    viewModel.detectCombined(image)
+                    //if(counterXX2222 == 1) {
+                        viewModel.detectCombined(image)
+                     //   counterXX2222=0
+                    //}
+                   // counterXX2222++
                 }
             }
 

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class LandmarksManager @Inject constructor(
-    private val faceLandmarkerHelper: FaceLandmarkerHelper,
+    //private val faceLandmarkerHelper: FaceLandmarkerHelper,
     private val poseLandmarkerHelper: PoseLandmarkerHelper,
     private val handLandmarkerHelper: HandLandmarkerHelper,
 ) {
@@ -22,23 +22,23 @@ class LandmarksManager @Inject constructor(
         const val GPU_ERROR = 1
     }
 
-    val faceLandmarks: StateFlow<FaceLandmarkerResultWrapper> =
-        faceLandmarkerHelper.faceLandmarks
+//    val faceLandmarks: StateFlow<FaceLandmarkerResultWrapper> =
+//        faceLandmarkerHelper.faceLandmarks
     val poseLandmarks: StateFlow<PoseLandmarkerResultWrapper> =
         poseLandmarkerHelper.poseLandmarks
     val handLandmarks: StateFlow<HandLandmarkerResultWrapper> =
         handLandmarkerHelper.handLandmarks
 
     init {
-        faceLandmarkerHelper.setupFaceLandmarker()
+        //faceLandmarkerHelper.setupFaceLandmarker()
         handLandmarkerHelper.setupHandLandmarker()
         poseLandmarkerHelper.setupPoseLandmarker()
     }
 
     fun setupLandmarkerIfClosed() {
-        if (faceLandmarkerHelper.isClose()) {
-            faceLandmarkerHelper.setupFaceLandmarker()
-        }
+//        if (faceLandmarkerHelper.isClose()) {
+//            faceLandmarkerHelper.setupFaceLandmarker()
+//        }
         if (handLandmarkerHelper.isClose()) {
             handLandmarkerHelper.setupHandLandmarker()
         }
@@ -48,7 +48,7 @@ class LandmarksManager @Inject constructor(
     }
 
     fun cleanLandmarker() {
-        faceLandmarkerHelper.clearFaceLandmarker()
+        //faceLandmarkerHelper.clearFaceLandmarker()
         handLandmarkerHelper.clearHandLandmarker()
         poseLandmarkerHelper.clearPoseLandmarker()
     }
@@ -59,7 +59,7 @@ class LandmarksManager @Inject constructor(
             isFrontCamera = true
         ) { mpImage, frameTime ->
             //TODO: maybe detect instead of detectAsync but on coroutines back thread
-            faceLandmarkerHelper.detectAsync(mpImage, frameTime)
+            //faceLandmarkerHelper.detectAsync(mpImage, frameTime)
             handLandmarkerHelper.detectAsync(mpImage, frameTime)
             poseLandmarkerHelper.detectAsync(mpImage, frameTime)
         }

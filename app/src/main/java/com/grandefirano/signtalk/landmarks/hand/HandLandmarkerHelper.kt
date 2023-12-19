@@ -105,7 +105,7 @@ class HandLandmarkerHelper@Inject constructor(
     ) {
         val finishTimeMs = SystemClock.uptimeMillis()
         val inferenceTime = finishTimeMs - result.timestampMs()
-
+        println("INFERENCE TIME HAND: $inferenceTime")
         updateHands(
             HandResultBundle(
                 result,

@@ -70,7 +70,8 @@ fun RecognizedSentencesContent(
         }
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally,modifier = Modifier.fillMaxWidth()) {
-        LanguageSwitch(translationChoice, onTranslationChange)
+        //TODO switch on when switching language is wanted
+        //LanguageSwitch(translationChoice, onTranslationChange)
         LazyColumn(
             state = listState,
             modifier = Modifier.padding(10.dp),

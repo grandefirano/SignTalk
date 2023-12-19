@@ -22,7 +22,7 @@ import kotlin.math.max
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
 
-    private var resultsFace: FaceLandmarkerResult? = null
+    //private var resultsFace: FaceLandmarkerResult? = null
     private var resultsPose: PoseLandmarkerResult? = null
     private var resultsHand: HandLandmarkerResult? = null
     private var linePaint = Paint()
@@ -37,7 +37,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun clear() {
-        resultsFace = null
+        //resultsFace = null
         resultsHand = null
         linePaint.reset()
         pointPaint.reset()
@@ -46,7 +46,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun clearFace() {
-        resultsFace = null
+        //resultsFace = null
         invalidate()
     }
 
@@ -63,7 +63,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        drawFace(canvas)
+        //drawFace(canvas)
         drawHand(canvas)
         drawPose(canvas)
     }
@@ -127,51 +127,51 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    private fun drawFace(canvas: Canvas) {
+//    private fun drawFace(canvas: Canvas) {
+//
+//        resultsFace?.let { faceLandmarkerResult ->
+//            if (faceLandmarkerResult.faceBlendshapes().isPresent) {
+//                faceLandmarkerResult.faceBlendshapes().get().forEach {
+//                    it.forEach {
+//                        Log.e(TAG, it.displayName() + " " + it.score())
+//                    }
+//                }
+//            }
+//
+//            for (landmark in faceLandmarkerResult.faceLandmarks()) {
+//                for (normalizedLandmark in landmark) {
+//                    canvas.drawPoint(
+//                        normalizedLandmark.x() * imageWidth * scaleFactor,
+//                        normalizedLandmark.y() * imageHeight * scaleFactor,
+//                        pointPaint
+//                    )
+//                }
+//
+//
+//                FaceLandmarker.FACE_LANDMARKS_CONNECTORS.forEach {
+//                    canvas.drawLine(
+//                        landmark.get(it!!.start())
+//                            .x() * imageWidth * scaleFactor,
+//                        landmark.get(it.start())
+//                            .y() * imageHeight * scaleFactor,
+//                        landmark.get(it.end())
+//                            .x() * imageWidth * scaleFactor,
+//                        landmark.get(it.end())
+//                            .y() * imageHeight * scaleFactor,
+//                        linePaint
+//                    )
+//                }
+//            }
+//        }
+//    }
 
-        resultsFace?.let { faceLandmarkerResult ->
-            if (faceLandmarkerResult.faceBlendshapes().isPresent) {
-                faceLandmarkerResult.faceBlendshapes().get().forEach {
-                    it.forEach {
-                        Log.e(TAG, it.displayName() + " " + it.score())
-                    }
-                }
-            }
-
-            for (landmark in faceLandmarkerResult.faceLandmarks()) {
-                for (normalizedLandmark in landmark) {
-                    canvas.drawPoint(
-                        normalizedLandmark.x() * imageWidth * scaleFactor,
-                        normalizedLandmark.y() * imageHeight * scaleFactor,
-                        pointPaint
-                    )
-                }
-
-
-                FaceLandmarker.FACE_LANDMARKS_CONNECTORS.forEach {
-                    canvas.drawLine(
-                        landmark.get(it!!.start())
-                            .x() * imageWidth * scaleFactor,
-                        landmark.get(it.start())
-                            .y() * imageHeight * scaleFactor,
-                        landmark.get(it.end())
-                            .x() * imageWidth * scaleFactor,
-                        landmark.get(it.end())
-                            .y() * imageHeight * scaleFactor,
-                        linePaint
-                    )
-                }
-            }
-        }
-    }
-
-    fun setFaceResults(faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?) {
-        println("HANDYY face result")
-        resultsFace = faceResultBundle?.result
-        faceResultBundle?.let {
-            setResultsCommon(it.inputImageHeight, it.inputImageWidth)
-        }
-    }
+//    fun setFaceResults(faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?) {
+//        println("HANDYY face result")
+//        resultsFace = faceResultBundle?.result
+//        faceResultBundle?.let {
+//            setResultsCommon(it.inputImageHeight, it.inputImageWidth)
+//        }
+//    }
 
     fun setPoseResults(poseResultBundle: PoseLandmarkerHelper.PoseResultBundle?) {
         resultsPose = poseResultBundle?.result
