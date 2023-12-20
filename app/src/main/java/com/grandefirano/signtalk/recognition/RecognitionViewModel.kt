@@ -1,6 +1,7 @@
 package com.grandefirano.signtalk.recognition
 
 import androidx.lifecycle.ViewModel
+import com.grandefirano.signtalk.prediction.ActionPredictionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

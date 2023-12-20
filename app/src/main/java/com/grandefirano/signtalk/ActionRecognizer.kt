@@ -8,7 +8,7 @@ import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.toXYZ
 import com.grandefirano.signtalk.landmarks.toXYZVisibility
-import com.grandefirano.signtalk.recognition.ActionPredictionManager
+import com.grandefirano.signtalk.prediction.ActionPredictionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

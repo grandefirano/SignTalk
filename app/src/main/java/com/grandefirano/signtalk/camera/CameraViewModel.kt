@@ -7,7 +7,6 @@ import com.grandefirano.signtalk.StaticRecognizer
 import com.grandefirano.signtalk.landmarks.LandmarksManager
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
-import com.grandefirano.signtalk.recognition.ActionPredictionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService

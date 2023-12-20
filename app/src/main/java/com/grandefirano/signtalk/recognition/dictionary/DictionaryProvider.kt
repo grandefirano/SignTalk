@@ -12,13 +12,10 @@ class DictionaryProvider @Inject constructor() {
         //TODO: Add longer dictionary - at least 30 words
         return when (isAction) {
             true -> when (translationChoice) {
-                TranslationChoice.ASL_ENGLISH -> getEnglishDictionary()
-                TranslationChoice.PJM_POLISH -> getPolishDictionary()
+                TranslationChoice.PJM_POLISH -> getPolishActionDictionary()
             }
-
             false -> when (translationChoice) {
-                TranslationChoice.ASL_ENGLISH -> getEnglishDictionary()
-                TranslationChoice.PJM_POLISH -> getPolishDictionary()
+                TranslationChoice.PJM_POLISH -> getPolishStaticDictionary()
             }
         }
     }
@@ -33,12 +30,9 @@ class PredictionInterpreterProvider @Inject constructor(
     ): Interpreter {
         return when (isAction) {
             true -> when (translationChoice) {
-                TranslationChoice.ASL_ENGLISH -> PJMPolishActionInterpreter(context)
                 TranslationChoice.PJM_POLISH -> PJMPolishActionInterpreter(context)
             }
-
             false -> when (translationChoice) {
-                TranslationChoice.ASL_ENGLISH -> PJMPolishActionInterpreter(context)
                 TranslationChoice.PJM_POLISH -> PJMPolishActionInterpreter(context)
             }
         }
@@ -48,13 +42,6 @@ class PredictionInterpreterProvider @Inject constructor(
 interface Interpreter {
     fun interpret(input: TensorBuffer): TensorBuffer
 }
-
-//class AslEnglishPoseInterpreter(context: Context) : Interpreter {
-//    private val model = ImageModel.newInstance(context)
-//    override fun interpret(input: TensorBuffer): TensorBuffer {
-//        return model.process(input).outputFeature0AsTensorBuffer
-//    }
-//}
 
 class PJMPolishActionInterpreter(context: Context) : Interpreter {
     private val model = Pjm10ModelV2.newInstance(context)

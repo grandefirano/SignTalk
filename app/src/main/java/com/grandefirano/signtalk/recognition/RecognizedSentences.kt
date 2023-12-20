@@ -94,16 +94,16 @@ fun LanguageSwitch(
     println("NEWWW TRANSLATION CHOSEEEN $translationChoice")
     Row (verticalAlignment = Alignment.CenterVertically) {
         Text(text = "PJM")
-        Switch(
-            checked = translationChoice == TranslationChoice.ASL_ENGLISH,
-            onCheckedChange = {
-                val newValue = when (translationChoice) {
-                    TranslationChoice.PJM_POLISH -> TranslationChoice.ASL_ENGLISH
-                    TranslationChoice.ASL_ENGLISH -> TranslationChoice.PJM_POLISH
-                }
-                onTranslationChange(newValue)
-            }
-        )
+//        Switch(
+//            checked = translationChoice == TranslationChoice.ASL_ENGLISH,
+//            onCheckedChange = {
+//                val newValue = when (translationChoice) {
+//                    TranslationChoice.PJM_POLISH -> TranslationChoice.ASL_ENGLISH
+//                    TranslationChoice.ASL_ENGLISH -> TranslationChoice.PJM_POLISH
+//                }
+//                onTranslationChange(newValue)
+//            }
+//        )
         Text(text = "ASL")
     }
 }

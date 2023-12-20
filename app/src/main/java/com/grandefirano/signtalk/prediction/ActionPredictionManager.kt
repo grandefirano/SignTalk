@@ -1,9 +1,12 @@
-package com.grandefirano.signtalk.recognition
+package com.grandefirano.signtalk.prediction
 
 import androidx.compose.runtime.mutableStateListOf
+import com.grandefirano.signtalk.recognition.TranslationChoice
+import com.grandefirano.signtalk.recognition.argmax
 import com.grandefirano.signtalk.recognition.dictionary.DictionaryProvider
 import com.grandefirano.signtalk.recognition.dictionary.Interpreter
 import com.grandefirano.signtalk.recognition.dictionary.PredictionInterpreterProvider
+import com.grandefirano.signtalk.recognition.toFloatArray
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
