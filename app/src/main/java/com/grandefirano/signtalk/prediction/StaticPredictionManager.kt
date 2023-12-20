@@ -6,7 +6,6 @@ import com.grandefirano.signtalk.recognition.argmax
 import com.grandefirano.signtalk.recognition.dictionary.DictionaryProvider
 import com.grandefirano.signtalk.recognition.dictionary.Interpreter
 import com.grandefirano.signtalk.recognition.dictionary.PredictionInterpreterProvider
-import com.grandefirano.signtalk.recognition.toFloatArray
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -16,54 +15,40 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ActionPredictionManager @Inject constructor(
+class StaticPredictionManager @Inject constructor(
     private val dictionaryProvider: DictionaryProvider,
     private val interpreterProvider: PredictionInterpreterProvider,
 ) {
 
-//    private val _translationChoice: MutableStateFlow<TranslationChoice> =
-//        MutableStateFlow(TranslationChoice.PJM_POLISH)
-//    val translationChoice: StateFlow<TranslationChoice> = _translationChoice
-
     private var interpreter: Interpreter =
-        interpreterProvider.getPredictionInterpreter(TranslationChoice.PJM_POLISH,true)
+        interpreterProvider.getPredictionInterpreter(TranslationChoice.PJM_POLISH,false)
 
     private var dictionaryLanguage: List<String> =
-        dictionaryProvider.getDictionary(TranslationChoice.PJM_POLISH,true)
+        dictionaryProvider.getDictionary(TranslationChoice.PJM_POLISH,false)
 
-    //TODO handle the flow below
-    private val _recognizedSentences: MutableStateFlow<MutableList<String>> =
+    private val _recognizedSigns: MutableStateFlow<MutableList<String>> =
         MutableStateFlow(mutableStateListOf())
-    val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
+    val recognizedSigns: StateFlow<List<String>> = _recognizedSigns
 
     private val threshold = 0.8
 
     private val lastPredictions = mutableListOf<Int>()
-    fun predict(sequence: List<List<Float>>) {
-        println("NOWYY PREDICT ACTION")
-        val floatArray = sequence.toFloatArray()
-        val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 23, 218), DataType.FLOAT32)
-        inputFeature.loadArray(floatArray, intArrayOf(1, 23, 218))
+    fun predict(sign:List<Float>) {
+        val floatArray = sign.toFloatArray()
+        val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 63), DataType.FLOAT32)
+        inputFeature.loadArray(floatArray, intArrayOf(1, 63))
         val outputFeature = interpreter.interpret(inputFeature)
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
         maxIndex?.let {
-            println("NOWYY ${dictionaryLanguage[it]}")
             updateLastPrediction(maxIndex)
             checkLastPredictions(maxIndex, list)
         }
     }
 
-//    fun switchTranslation(translationChoice: TranslationChoice) {
-//        _translationChoice.value = translationChoice
-//        interpreter = interpreterProvider.getPredictionInterpreter(translationChoice)
-//        dictionaryLanguage = dictionaryProvider.getDictionary(translationChoice)
-//    }
-
     private fun updateLastPrediction(prediction: Int) {
-
         lastPredictions.add(prediction)
-        if (lastPredictions.size > 5) lastPredictions.removeAt(0)
+        if (lastPredictions.size > 10) lastPredictions.removeAt(0)
     }
 
     private fun checkLastPredictions(currentIndex: Int, list: List<Float>) {
@@ -77,9 +62,9 @@ class ActionPredictionManager @Inject constructor(
         if (isEqual) {
             if (list[currentIndex] > threshold) {
                 val currentSentence = dictionaryLanguage[currentIndex]
-                if (_recognizedSentences.value.size > 0) {
+                if (_recognizedSigns.value.size > 0) {
 
-                    if (currentSentence != _recognizedSentences.value.last()) {
+                    if (currentSentence != _recognizedSigns.value.last()) {
                         addSentenceItem(currentSentence)
                     }
                 } else {
@@ -91,6 +76,6 @@ class ActionPredictionManager @Inject constructor(
     }
 
     private fun addSentenceItem(currentSentence: String) {
-        _recognizedSentences.update { it.apply { add(currentSentence) } }
+        _recognizedSigns.update { it.apply { add(currentSentence) } }
     }
 }

@@ -101,7 +101,9 @@ class CameraFragment : Fragment() {
         lifecycleScope.launch {
             launch {
                 println("NOWYY ONVIEW CREATED")
-                viewModel.startActionRecognition()
+                //TODO:switch here
+                //viewModel.startActionRecognition()
+                viewModel.startStaticRecognition()
             }
             launch {
                 setHandDrawing()

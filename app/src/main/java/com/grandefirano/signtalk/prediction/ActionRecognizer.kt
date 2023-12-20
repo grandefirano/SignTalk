@@ -1,16 +1,13 @@
-package com.grandefirano.signtalk
+package com.grandefirano.signtalk.prediction
 
 import android.os.SystemClock
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.grandefirano.signtalk.landmarks.LandmarksManager
 import com.grandefirano.signtalk.landmarks.flattenXYZ
 import com.grandefirano.signtalk.landmarks.flattenXYZV
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
-import com.grandefirano.signtalk.landmarks.hand.extractHands
+import com.grandefirano.signtalk.landmarks.hand.extractHandsXYZKeypoints
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
-import com.grandefirano.signtalk.landmarks.toXYZ
 import com.grandefirano.signtalk.landmarks.toXYZVisibility
-import com.grandefirano.signtalk.prediction.ActionPredictionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -77,7 +74,7 @@ class ActionRecognizer @Inject constructor(
             updateLastSequence(it)
             if (lastSequence.size == 23) {
                 println("JAKUB1222 ${lastSequence.size}")
-                actionPredictionManager.predictAction(lastSequence)
+                actionPredictionManager.predict(lastSequence)
             }
         }
     }
@@ -104,9 +101,9 @@ class ActionRecognizer @Inject constructor(
 //            landmarks.face.faceResultBundle?.result?.faceLandmarks()?.flatten()?.dropIrises()
 //                ?.toXYZ()
 //                ?.flattenXYZ().let { if (it.isNullOrEmpty()) List(468 * 3) { 0f } else it }
-        val handResult = landmarks.hand.handResultBundle?.results.extractHands()
-        val leftHand = handResult.first
-        val rightHand = handResult.second
+        val handResult = landmarks.hand.handResultBundle?.results.extractHandsXYZKeypoints()
+        val leftHand = handResult.first.flattenXYZ()
+        val rightHand = handResult.second.flattenXYZ()
 
         if (leftHand.size != 21 * 3) {
             println("WRONGGGG left hand ${leftHand.size}")

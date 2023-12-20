@@ -2,11 +2,11 @@ package com.grandefirano.signtalk.camera
 
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
-import com.grandefirano.signtalk.ActionRecognizer
-import com.grandefirano.signtalk.StaticRecognizer
 import com.grandefirano.signtalk.landmarks.LandmarksManager
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
+import com.grandefirano.signtalk.prediction.ActionRecognizer
+import com.grandefirano.signtalk.prediction.StaticRecognizer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService
@@ -25,7 +25,9 @@ class CameraViewModel @Inject constructor(
 
     val handLandmarks: StateFlow<HandLandmarkerResultWrapper> = landmarksManager.handLandmarks
     val poseLandmarks: StateFlow<PoseLandmarkerResultWrapper> = landmarksManager.poseLandmarks
-    val recognizedActionSentences: StateFlow<List<String>> = actionRecognizer.recognizedActionSentences
+    //TODO: SWITCH HERE
+    //val recognizedActionSentences: StateFlow<List<String>> = actionRecognizer.recognizedActionSentences
+    val recognizedActionSentences: StateFlow<List<String>> = staticRecognizer.recognizedStaticSigns
     //val translationChoice: StateFlow<TranslationChoice> = actionPredictionManager.translationChoice
 
 //    fun switchTranslation(translationChoice: TranslationChoice) {
@@ -58,6 +60,10 @@ class CameraViewModel @Inject constructor(
     suspend fun startActionRecognition() {
         println("NOWYY ACTION RECOGNITION VM")
         actionRecognizer.startActionRecognition()
+    }
+
+    suspend fun startStaticRecognition() {
+        staticRecognizer.startStaticRecognition()
     }
 }
 
