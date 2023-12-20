@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.util.Range
-import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +27,6 @@ import com.grandefirano.signtalk.PermissionsFragment
 import com.grandefirano.signtalk.databinding.FragmentCameraBinding
 import com.grandefirano.signtalk.recognition.RecognizedSentences
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -102,32 +100,29 @@ class CameraFragment : Fragment() {
         }
         lifecycleScope.launch {
             launch {
-                viewModel.combinedLandmarks.collect {
-                    viewModel.onLandmarkUpdated(it)
-                }
+                println("NOWYY ONVIEW CREATED")
+                viewModel.startActionRecognition()
             }
             launch {
-                viewModel.handLandmarks.collect {
-                    fragmentCameraBinding.overlay.setHandResults(it.handResultBundle)
-                    fragmentCameraBinding.overlay.invalidate()
-
-                }
+                setHandDrawing()
             }
             launch {
-                viewModel.poseLandmarks.collect {
-                    fragmentCameraBinding.overlay.setPoseResults(it.poseResultBundle)
-                    fragmentCameraBinding.overlay.invalidate()
-
-                }
+                setPoseDrawing()
             }
-//            launch {
-//                viewModel.faceLandmarks.collect {
-//                    fragmentCameraBinding.overlay.setFaceResults(it.faceResultBundle)
-//                    // Force a redraw
-//                    fragmentCameraBinding.overlay.invalidate()
-//
-//                }
-//            }
+        }
+    }
+
+    private suspend fun setHandDrawing() {
+        viewModel.handLandmarks.collect {
+            fragmentCameraBinding.overlay.setHandResults(it.handResultBundle)
+            fragmentCameraBinding.overlay.invalidate()
+        }
+    }
+
+    private suspend fun setPoseDrawing() {
+        viewModel.poseLandmarks.collect {
+            fragmentCameraBinding.overlay.setPoseResults(it.poseResultBundle)
+            fragmentCameraBinding.overlay.invalidate()
         }
     }
 
@@ -201,10 +196,10 @@ class CameraFragment : Fragment() {
                         counterXXSaved = newXX
                     }
                     //if(counterXX2222 == 1) {
-                        viewModel.detectCombined(image)
-                     //   counterXX2222=0
+                    viewModel.detectCombined(image)
+                    //   counterXX2222=0
                     //}
-                   // counterXX2222++
+                    // counterXX2222++
                 }
             }
 

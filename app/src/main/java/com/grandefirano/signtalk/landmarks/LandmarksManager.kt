@@ -1,16 +1,16 @@
 package com.grandefirano.signtalk.landmarks
 
 import androidx.camera.core.ImageProxy
-import com.grandefirano.signtalk.landmarks.face.FaceLandmarkerHelper
+import com.grandefirano.signtalk.camera.detectLiveStream
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerHelper
-import com.grandefirano.signtalk.landmarks.face.FaceLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerHelper
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
-import com.grandefirano.signtalk.camera.detectLiveStream
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LandmarksManager @Inject constructor(
     //private val faceLandmarkerHelper: FaceLandmarkerHelper,
     private val poseLandmarkerHelper: PoseLandmarkerHelper,
