@@ -7,10 +7,10 @@ import com.grandefirano.signtalk.landmarks.toXYZ
 fun HandLandmarkerResult?.extractHandsXYZKeypoints(): Pair<List<XYZKeypoints>, List<XYZKeypoints>> {
     val handedness = this?.handedness()?.flatten()
     val rightHandIndex = handedness?.indexOfFirst {
-        it.categoryName() == "Left"
+        it.categoryName() == "Right"
     }
     val leftHandIndex = handedness?.indexOfFirst {
-        it.categoryName() == "Right"
+        it.categoryName() == "Left"
     }
     val rightHand = rightHandIndex?.let {
         this?.landmarks()?.getOrNull(rightHandIndex)?.toXYZ()
