@@ -1,10 +1,12 @@
 package com.grandefirano.signtalk
 
 import android.os.SystemClock
+import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.grandefirano.signtalk.landmarks.LandmarksManager
 import com.grandefirano.signtalk.landmarks.flattenXYZ
 import com.grandefirano.signtalk.landmarks.flattenXYZV
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
+import com.grandefirano.signtalk.landmarks.hand.extractHands
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.toXYZ
 import com.grandefirano.signtalk.landmarks.toXYZVisibility
@@ -102,22 +104,10 @@ class ActionRecognizer @Inject constructor(
 //            landmarks.face.faceResultBundle?.result?.faceLandmarks()?.flatten()?.dropIrises()
 //                ?.toXYZ()
 //                ?.flattenXYZ().let { if (it.isNullOrEmpty()) List(468 * 3) { 0f } else it }
-        val handResult = landmarks.hand.handResultBundle?.results
-        val handedness = handResult?.handedness()?.flatten()
-        val rightHandIndex = handedness?.indexOfFirst {
-            it.categoryName() == "Left"
-        }
-        val leftHandIndex = handedness?.indexOfFirst {
-            it.categoryName() == "Right"
-        }
-        val rightHand = rightHandIndex?.let {
-            handResult.landmarks()?.getOrNull(rightHandIndex)?.toXYZ()
-                ?.flattenXYZ()
-        } ?: List(21 * 3) { 0f }
-        val leftHand = leftHandIndex?.let {
-            handResult.landmarks()?.getOrNull(leftHandIndex)?.toXYZ()
-                ?.flattenXYZ()
-        } ?: List(21 * 3) { 0f }
+        val handResult = landmarks.hand.handResultBundle?.results.extractHands()
+        val leftHand = handResult.first
+        val rightHand = handResult.second
+
         if (leftHand.size != 21 * 3) {
             println("WRONGGGG left hand ${leftHand.size}")
         }

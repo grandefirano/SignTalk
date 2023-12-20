@@ -1,13 +1,12 @@
 package com.grandefirano.signtalk.recognition
 
 import androidx.lifecycle.ViewModel
-import com.grandefirano.signtalk.prediction.ActionPredictionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class RecognitionViewModel @Inject constructor(
-    private val actionPredictionManager: ActionPredictionManager
+    //private val actionPredictionManager: ActionPredictionManager
 ):ViewModel() {
 
 //    val recognizedSentences: StateFlow<List<String>> = predictionManager.recognizedSentences
