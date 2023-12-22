@@ -43,7 +43,7 @@ fun List<XYZKeypoints>.normalize(): List<XYZKeypoints> {
     val deltaX = biggestX - smallestX
     val deltaY = biggestY - smallestY
     val deltaZ = biggestZ - smallestZ
-    if (deltaX == 0f || deltaY == 0f || deltaZ == 0f) return List(21) { XYZKeypoints(0f, 0f, 0f) }
+    if (deltaX == 0f || deltaY == 0f || deltaZ == 0f) return List(this.size) { XYZKeypoints(0f, 0f, 0f) }
     return this.map {
         val normX = (it.x - smallestX) / deltaX
         val normY = (it.y - smallestY) / deltaY

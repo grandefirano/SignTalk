@@ -26,8 +26,8 @@ class CameraViewModel @Inject constructor(
     val handLandmarks: StateFlow<HandLandmarkerResultWrapper> = landmarksManager.handLandmarks
     val poseLandmarks: StateFlow<PoseLandmarkerResultWrapper> = landmarksManager.poseLandmarks
     //TODO: SWITCH HERE
-    //val recognizedActionSentences: StateFlow<List<String>> = actionRecognizer.recognizedActionSentences
-    val recognizedActionSentences: StateFlow<List<String>> = staticRecognizer.recognizedStaticSigns
+    val recognizedActionSentences: StateFlow<List<String>> = actionRecognizer.recognizedActionSentences
+    //val recognizedActionSentences: StateFlow<List<String>> = staticRecognizer.recognizedStaticSigns
     //val translationChoice: StateFlow<TranslationChoice> = actionPredictionManager.translationChoice
 
 //    fun switchTranslation(translationChoice: TranslationChoice) {

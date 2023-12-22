@@ -102,8 +102,8 @@ class CameraFragment : Fragment() {
             launch {
                 println("NOWYY ONVIEW CREATED")
                 //TODO:switch here
-                //viewModel.startActionRecognition()
-                viewModel.startStaticRecognition()
+                viewModel.startActionRecognition()
+                //viewModel.startStaticRecognition()
             }
             launch {
                 setHandDrawing()

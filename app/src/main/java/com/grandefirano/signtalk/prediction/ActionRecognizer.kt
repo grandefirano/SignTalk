@@ -2,11 +2,14 @@ package com.grandefirano.signtalk.prediction
 
 import android.os.SystemClock
 import com.grandefirano.signtalk.landmarks.LandmarksManager
+import com.grandefirano.signtalk.landmarks.XYZKeypoints
 import com.grandefirano.signtalk.landmarks.flattenXYZ
 import com.grandefirano.signtalk.landmarks.flattenXYZV
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
 import com.grandefirano.signtalk.landmarks.hand.extractHandsXYZKeypoints
+import com.grandefirano.signtalk.landmarks.normalize
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
+import com.grandefirano.signtalk.landmarks.toXYZ
 import com.grandefirano.signtalk.landmarks.toXYZVisibility
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -93,25 +96,22 @@ class ActionRecognizer @Inject constructor(
         //TODO: CHANGE LOGIC OF OBSERVING SO IT DOESNT STOP HERE FOR THESE, NOW IT DOESNT STOP FOR NON EXISTING HANDS ONLY
 
         val poseBefore =
-            landmarks.pose.poseResultBundle?.result?.landmarks()?.flatten()?.toXYZVisibility()
+            landmarks.pose.poseResultBundle?.result?.landmarks()?.flatten()?.toXYZ()
         val pose = poseBefore?.filterIndexed { index, _ ->
             filterPoseLandmarks.contains(index).not()
-        }?.flattenXYZV().let { if (it.isNullOrEmpty()) List(23 * 4) { 0f } else it }
-//        val face =
-//            landmarks.face.faceResultBundle?.result?.faceLandmarks()?.flatten()?.dropIrises()
-//                ?.toXYZ()
-//                ?.flattenXYZ().let { if (it.isNullOrEmpty()) List(468 * 3) { 0f } else it }
+        }.let { if (it.isNullOrEmpty()) List(23) { XYZKeypoints(0f,0f,0f) } else it }
         val handResult = landmarks.hand.handResultBundle?.results.extractHandsXYZKeypoints()
-        val leftHand = handResult.first.flattenXYZ()
-        val rightHand = handResult.second.flattenXYZ()
+        val leftHand = handResult.first//.flattenXYZ()
+        val rightHand = handResult.second//.flattenXYZ()
+        val combinedLandmarks = pose+leftHand+rightHand
 
-        if (leftHand.size != 21 * 3) {
+        if (leftHand.size != 21 ) {
             println("WRONGGGG left hand ${leftHand.size}")
         }
-        if (rightHand.size != 21 * 3) {
+        if (rightHand.size != 21 ) {
             println("WRONGGGG right hand ${rightHand.size}")
         }
-        if (pose.size != 33 * 4) {
+        if (pose.size != 23) {
             println("WRONGGGG pose ${pose.size}")
         }
 //        if (face.size != 468 * 3) {
@@ -119,9 +119,7 @@ class ActionRecognizer @Inject constructor(
 //        }
         println("TESTTT hand RIGHT $rightHand")
         println("TESTTT hand LEFT $leftHand")
-        return pose +
-                //face +
-                leftHand + rightHand
+        return combinedLandmarks.normalize().flattenXYZ()
     }
 
     fun CombinedLandmarks.doWhenAllUpdated(

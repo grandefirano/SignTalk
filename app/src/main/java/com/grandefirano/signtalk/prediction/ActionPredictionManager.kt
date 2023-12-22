@@ -42,8 +42,9 @@ class ActionPredictionManager @Inject constructor(
     fun predict(sequence: List<List<Float>>) {
         println("NOWYY PREDICT ACTION")
         val floatArray = sequence.toFloatArray()
-        val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 23, 218), DataType.FLOAT32)
-        inputFeature.loadArray(floatArray, intArrayOf(1, 23, 218))
+        val inputSize = intArrayOf(1, 23, 195)
+        val inputFeature = TensorBuffer.createFixedSize(inputSize, DataType.FLOAT32)
+        inputFeature.loadArray(floatArray, inputSize)
         val outputFeature = interpreter.interpret(inputFeature)
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
