@@ -16,66 +16,38 @@ import javax.inject.Singleton
 
 @Singleton
 class StaticPredictionManager @Inject constructor(
-    private val dictionaryProvider: DictionaryProvider,
-    private val interpreterProvider: PredictionInterpreterProvider,
-) {
+    dictionaryProvider: DictionaryProvider,
+    interpreterProvider: PredictionInterpreterProvider,
+) : PredictionManager {
+    private val translationChoice: TranslationChoice = TranslationChoice.PJM_POLISH
+    private val isAction: Boolean = false
+    private val interpreter: Interpreter =
+        interpreterProvider.getPredictionInterpreter(translationChoice, isAction)
+    private val dictionaryLanguage: List<String> =
+        dictionaryProvider.getDictionary(translationChoice, isAction)
 
-    private var interpreter: Interpreter =
-        interpreterProvider.getPredictionInterpreter(TranslationChoice.PJM_POLISH,false)
 
-    private var dictionaryLanguage: List<String> =
-        dictionaryProvider.getDictionary(TranslationChoice.PJM_POLISH,false)
-
-    private val _recognizedSigns: MutableStateFlow<MutableList<String>> =
-        MutableStateFlow(mutableStateListOf())
-    val recognizedSigns: StateFlow<List<String>> = _recognizedSigns
-
-    private val threshold = 0.8
-
-    private val lastPredictions = mutableListOf<Int>()
-    fun predict(sign:List<Float>) {
-        val floatArray = sign.toFloatArray()
+    override fun predict(input: List<Float>): Prediction? {
+        val floatArray = input.toFloatArray()
         val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, 63), DataType.FLOAT32)
         inputFeature.loadArray(floatArray, intArrayOf(1, 63))
         val outputFeature = interpreter.interpret(inputFeature)
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
-        maxIndex?.let {
-            updateLastPrediction(maxIndex)
-            checkLastPredictions(maxIndex, list)
+        return maxIndex?.let {
+            val possibility = list[maxIndex]
+            Prediction(dictionaryLanguage[maxIndex], possibility)
         }
-    }
-
-    private fun updateLastPrediction(prediction: Int) {
-        lastPredictions.add(prediction)
-        if (lastPredictions.size > 10) lastPredictions.removeAt(0)
-    }
-
-    private fun checkLastPredictions(currentIndex: Int, list: List<Float>) {
-        var isEqual = true
-        lastPredictions.forEach {
-            if (currentIndex != it) {
-                isEqual = false
-                return@forEach
-            }
-        }
-        if (isEqual) {
-            if (list[currentIndex] > threshold) {
-                val currentSentence = dictionaryLanguage[currentIndex]
-                if (_recognizedSigns.value.size > 0) {
-
-                    if (currentSentence != _recognizedSigns.value.last()) {
-                        addSentenceItem(currentSentence)
-                    }
-                } else {
-                    addSentenceItem(currentSentence)
-                }
-                println("GUESS ${dictionaryLanguage[currentIndex]}")
-            }
-        }
-    }
-
-    private fun addSentenceItem(currentSentence: String) {
-        _recognizedSigns.update { it.apply { add(currentSentence) } }
     }
 }
+
+interface PredictionManager {
+    fun predict(input: List<Float>): Prediction?
+}
+
+data class Prediction(
+    val value: String,
+    val possibility: Float
+)
+
+

@@ -17,11 +17,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class PoseLandmarkerHelper@Inject constructor(
+class PoseLandmarksRepository@Inject constructor(
     @ApplicationContext val context: Context,
 ) {
 
-    val poseLandmarks: MutableStateFlow<PoseLandmarkerResultWrapper> =
+    val poseLandmarks: MutableStateFlow<PoseLandmarksResult> =
         MutableStateFlow(initPoseLandmarkerResultWrapper())
 
     // For this example this needs to be a var so it can be reset on changes.

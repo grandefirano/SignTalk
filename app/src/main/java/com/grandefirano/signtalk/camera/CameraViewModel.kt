@@ -3,10 +3,10 @@ package com.grandefirano.signtalk.camera
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
 import com.grandefirano.signtalk.landmarks.LandmarksManager
-import com.grandefirano.signtalk.landmarks.hand.HandLandmarkerResultWrapper
-import com.grandefirano.signtalk.landmarks.pose.PoseLandmarkerResultWrapper
-import com.grandefirano.signtalk.prediction.ActionRecognizer
-import com.grandefirano.signtalk.prediction.StaticRecognizer
+import com.grandefirano.signtalk.landmarks.hand.HandLandmarksResult
+import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksResult
+import com.grandefirano.signtalk.prediction.ActionRecognitionManager
+import com.grandefirano.signtalk.prediction.StaticRecognitionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.ExecutorService
@@ -17,16 +17,16 @@ import javax.inject.Inject
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val landmarksManager: LandmarksManager,
-    private val actionRecognizer: ActionRecognizer,
-    private val staticRecognizer: StaticRecognizer,
+    private val actionRecognitionManager: ActionRecognitionManager,
+    private val staticRecognitionManager: StaticRecognitionManager,
 ) : ViewModel() {
 
     val backgroundExecutor: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
 
-    val handLandmarks: StateFlow<HandLandmarkerResultWrapper> = landmarksManager.handLandmarks
-    val poseLandmarks: StateFlow<PoseLandmarkerResultWrapper> = landmarksManager.poseLandmarks
+    val handLandmarks: StateFlow<HandLandmarksResult> = landmarksManager.handLandmarks
+    val poseLandmarks: StateFlow<PoseLandmarksResult> = landmarksManager.poseLandmarks
     //TODO: SWITCH HERE
-    val recognizedActionSentences: StateFlow<List<String>> = actionRecognizer.recognizedActionSentences
+    val recognizedActionSentences: StateFlow<List<String>> = actionRecognitionManager.recognizedActionSentences
     //val recognizedActionSentences: StateFlow<List<String>> = staticRecognizer.recognizedStaticSigns
     //val translationChoice: StateFlow<TranslationChoice> = actionPredictionManager.translationChoice
 
@@ -59,11 +59,11 @@ class CameraViewModel @Inject constructor(
 
     suspend fun startActionRecognition() {
         println("NOWYY ACTION RECOGNITION VM")
-        actionRecognizer.startActionRecognition()
+        actionRecognitionManager.startActionRecognition()
     }
 
     suspend fun startStaticRecognition() {
-        staticRecognizer.startStaticRecognition()
+        staticRecognitionManager.startStaticRecognition()
     }
 }
 

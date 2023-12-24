@@ -17,10 +17,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class HandLandmarkerHelper@Inject constructor(
+class HandLandmarksRepository@Inject constructor(
     @ApplicationContext val context: Context,
 ) {
-    val handLandmarks: MutableStateFlow<HandLandmarkerResultWrapper> =
+    val handLandmarks: MutableStateFlow<HandLandmarksResult> =
         MutableStateFlow(initHandLandmarkerResultWrapper())
 
     // For this example this needs to be a var so it can be reset on changes.
