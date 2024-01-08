@@ -9,32 +9,37 @@ import com.grandefirano.signtalk.landmarks.hand.extractHandsXYZKeypoints
 import com.grandefirano.signtalk.landmarks.normalize
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class StaticRecognitionManager @Inject constructor(
-    private val landmarksManager: LandmarksManager,
+    landmarksManager: LandmarksManager,
     private val staticPredictionManager: StaticPredictionManager,
 ) {
     private val handLandmarks: StateFlow<HandLandmarksResult> =
         landmarksManager.handLandmarks
 
-    private val _recognizedSigns: MutableStateFlow<MutableList<String>> =
+    private val _recognizedElements: MutableStateFlow<MutableList<String>> =
         MutableStateFlow(mutableStateListOf())
-    val recognizedSigns: StateFlow<List<String>> = _recognizedSigns
+    val recognizedElements: StateFlow<List<String>> = _recognizedElements
+
+    private val _lastRecognizedElement: MutableStateFlow<String?> =
+        MutableStateFlow(null)
+    val lastRecognizedElement: StateFlow<String?> = _lastRecognizedElement
 
     private val threshold = 0.8
 
     private val lastPredictions = mutableListOf<String>()
     suspend fun startStaticRecognition() {
         handLandmarks.collect {
-            onLandmarkUpdated(it)
+            onLandmarksUpdated(it)
         }
     }
 
-    private fun onLandmarkUpdated(handLandmarks: HandLandmarksResult) {
+    private fun onLandmarksUpdated(handLandmarks: HandLandmarksResult) {
         val normalizedKeypoints = extractLeftHandKeypoints(handLandmarks).normalize()
         val flattenList = normalizedKeypoints.flattenXYZ()
         val prediction = staticPredictionManager.predict(flattenList)
@@ -54,13 +59,13 @@ class StaticRecognitionManager @Inject constructor(
         }
         if (isEqual) {
             if (possibility > threshold) {
-                if (_recognizedSigns.value.size > 0) {
+                if (_recognizedElements.value.size > 0) {
 
-                    if (currentSentence != _recognizedSigns.value.last()) {
-                        addSentenceItem(currentSentence)
+                    if (currentSentence != _recognizedElements.value.last()) {
+                        addRecognizedItem(currentSentence)
                     }
                 } else {
-                    addSentenceItem(currentSentence)
+                    addRecognizedItem(currentSentence)
                 }
                 println("GUESS $currentSentence")
             }
@@ -72,12 +77,13 @@ class StaticRecognitionManager @Inject constructor(
         if (lastPredictions.size > 10) lastPredictions.removeAt(0)
     }
 
-    private fun addSentenceItem(currentSentence: String) {
-        _recognizedSigns.update { it.apply { add(currentSentence) } }
+    private fun addRecognizedItem(currentSentence: String) {
+        _recognizedElements.update { it.apply { add(currentSentence) } }
+        _lastRecognizedElement.update { currentSentence }
     }
+}
 
-    private fun extractLeftHandKeypoints(landmarks: HandLandmarksResult): List<XYZKeypoints> {
-        val handResult = landmarks.handResultBundle?.results.extractHandsXYZKeypoints()
-        return handResult.first
-    }
+private fun extractLeftHandKeypoints(landmarks: HandLandmarksResult): List<XYZKeypoints> {
+    val handResult = landmarks.handResultBundle?.results.extractHandsXYZKeypoints()
+    return handResult.first
 }

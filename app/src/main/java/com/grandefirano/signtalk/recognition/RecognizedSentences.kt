@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -27,11 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,32 +48,45 @@ import com.grandefirano.signtalk.ui.theme.SignTalkTheme
 
 @Composable
 fun RecognizedSentences(viewModel: CameraViewModel = hiltViewModel()) {
-    val recognizedSentences by viewModel.recognizedActionSentences.collectAsStateWithLifecycle()
+    val recognizedSentences by viewModel.allRecognizedElements.collectAsStateWithLifecycle()
     //val translationChoice by viewModel.translationChoice.collectAsStateWithLifecycle()
-    val onTranslationChange: (TranslationChoice) -> Unit = {}//viewModel::switchTranslation
+    //val onTranslationChange: (TranslationChoice) -> Unit = {}//viewModel::switchTranslation
+    val coroutineScope = rememberCoroutineScope()
+    var isActionRecognitionMode by remember { mutableStateOf(true) }
+    LaunchedEffect(isActionRecognitionMode) {
+        println("ZZZZZ launch effect happened")
+        viewModel.switchRecognitionModel(isActionRecognitionMode, coroutineScope)
+    }
     RecognizedSentencesContent(
         recognizedSentences = recognizedSentences,
+        onRecognitionModeChange = {
+            println("ZZZZZ Change happened")
+            isActionRecognitionMode = it
+        },
+        isActionMode = isActionRecognitionMode
         //translationChoice = translationChoice,
         //onTranslationChange = onTranslationChange
     )
 }
 
+//TODO: to można zeskrinować
 @Composable
 fun RecognizedSentencesContent(
     recognizedSentences: List<String>,
-    //translationChoice: TranslationChoice,
-    //onTranslationChange: (TranslationChoice) -> Unit
+    isActionMode: Boolean,
+    onRecognitionModeChange: (Boolean) -> Unit
 ) {
     val listState = rememberLazyListState(0)
     LaunchedEffect(recognizedSentences.size) {
-        println("EEEEE ${recognizedSentences.lastIndex}")
         if (recognizedSentences.lastIndex > -1) {
             listState.animateScrollToItem(recognizedSentences.lastIndex)
         }
     }
-    Column(horizontalAlignment = Alignment.CenterHorizontally,modifier = Modifier.fillMaxWidth()) {
-        //TODO switch on when switching language is wanted
-        //LanguageSwitch(translationChoice, onTranslationChange)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        RecognitionModeSwitch(
+            isAction = isActionMode,
+            onRecognitionModeChange = onRecognitionModeChange
+        )
         LazyColumn(
             state = listState,
             modifier = Modifier.padding(10.dp),
@@ -80,7 +98,6 @@ fun RecognizedSentencesContent(
             }
             item {
                 DotsTyping()
-                //Text(text = "...",color = Color.Gray)
             }
         }
     }
@@ -92,7 +109,7 @@ fun LanguageSwitch(
     onTranslationChange: (TranslationChoice) -> Unit
 ) {
     println("NEWWW TRANSLATION CHOSEEEN $translationChoice")
-    Row (verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Text(text = "PJM")
 //        Switch(
 //            checked = translationChoice == TranslationChoice.ASL_ENGLISH,
@@ -105,6 +122,34 @@ fun LanguageSwitch(
 //            }
 //        )
         Text(text = "ASL")
+    }
+}
+
+@Composable
+fun RecognitionModeSwitch(
+    isAction: Boolean,
+    onRecognitionModeChange: (Boolean) -> Unit
+) {
+    //println("NEWWW TRANSLATION CHOSEEEN $translationChoice")
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painterResource(id = R.drawable.static_recognition),
+            "Static recognition",
+            tint = Color.Gray,
+            modifier = Modifier.padding(8.dp)
+        )
+        Switch(
+            checked = isAction,
+            onCheckedChange = {
+                onRecognitionModeChange(it)
+            }
+        )
+        Icon(
+            painterResource(id = R.drawable.action_recognition),
+            "Action recognition",
+            tint = Color.Gray,
+            modifier = Modifier.padding(8.dp)
+        )
     }
 }
 
@@ -168,7 +213,7 @@ fun DotsTyping() {
 @Preview
 @Composable
 fun RecognizedSentencesPreview() {
-    val recognizedSentences = listOf("Dziękuję", "Przepraszam", "Dobranoc")
+    val recognizedSentences = listOf("Który", "Mam", "Dziękuję")
     SignTalkTheme {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -176,9 +221,27 @@ fun RecognizedSentencesPreview() {
         ) {
             RecognizedSentencesContent(
                 recognizedSentences = recognizedSentences,
-                //translationChoice = TranslationChoice.ASL_ENGLISH,
-                //onTranslationChange = {}
+                isActionMode = true,
+                onRecognitionModeChange = {}
             )
         }
     }
 }
+
+//@Preview
+//@Composable
+//fun RecognizedSentencesPreview() {
+//    val recognizedSentences = listOf("Dziękuję", "Przepraszam", "Dobranoc")
+//    SignTalkTheme {
+//        Surface(
+//            modifier = Modifier.fillMaxWidth(),
+//            color = MaterialTheme.colorScheme.background
+//        ) {
+//            RecognizedSentencesContent(
+//                recognizedSentences = recognizedSentences,
+//                //translationChoice = TranslationChoice.ASL_ENGLISH,
+//                //onTranslationChange = {}
+//            )
+//        }
+//    }
+//}

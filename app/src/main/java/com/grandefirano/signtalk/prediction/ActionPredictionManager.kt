@@ -35,7 +35,9 @@ class ActionPredictionManager @Inject constructor(
     private val _recognizedSentences: MutableStateFlow<MutableList<String>> =
         MutableStateFlow(mutableStateListOf())
     val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
-
+    private val _lastRecognizedElement: MutableStateFlow<String?> =
+        MutableStateFlow(null)
+    val lastRecognizedElement: StateFlow<String?> = _lastRecognizedElement
     private val threshold = 0.8
 
     private val lastPredictions = mutableListOf<Int>()
@@ -93,5 +95,6 @@ class ActionPredictionManager @Inject constructor(
 
     private fun addSentenceItem(currentSentence: String) {
         _recognizedSentences.update { it.apply { add(currentSentence) } }
+        _lastRecognizedElement.value = currentSentence
     }
 }

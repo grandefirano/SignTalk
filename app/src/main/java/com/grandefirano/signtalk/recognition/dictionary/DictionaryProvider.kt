@@ -2,8 +2,7 @@ package com.grandefirano.signtalk.recognition.dictionary
 
 import android.content.Context
 import com.grandefirano.signtalk.ml.Pjm10ModelNorm
-import com.grandefirano.signtalk.ml.Pjm10ModelV2
-import com.grandefirano.signtalk.ml.PjmLeftHandV2
+import com.grandefirano.signtalk.ml.PjmLeftHandV3
 import com.grandefirano.signtalk.recognition.TranslationChoice
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -54,7 +53,7 @@ class PJMPolishActionInterpreter(context: Context) : Interpreter {
 }
 
 class PJMPolishStaticInterpreter(context: Context) : Interpreter {
-    private val model = PjmLeftHandV2.newInstance(context)
+    private val model = PjmLeftHandV3.newInstance(context)
     override fun interpret(input: TensorBuffer): TensorBuffer {
         return model.process(input).outputFeature0AsTensorBuffer
     }

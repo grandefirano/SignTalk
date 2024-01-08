@@ -17,14 +17,14 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class GetUpperBodyLandmarks(
+class GetUpperBodyLandmarksUseCase @Inject constructor(
     private val landmarksManager: LandmarksManager
 ) {
     private var counterXX = 0
     private var counterXXSaved = 0L
     private var lastConsumedFrame = ConsumedFrames(0, 0)
 
-    operator fun invoke(): Flow<CombinedLandmarks> {
+    operator fun invoke(): Flow<List<XYZKeypoints>> {
         return combine(
             landmarksManager.handLandmarks,
             landmarksManager.poseLandmarks
@@ -44,11 +44,21 @@ class GetUpperBodyLandmarks(
             println("Frame hand ${hand.frameNumber}")
             println("Frame pose ${pose.frameNumber}")
             CombinedLandmarks(hand, pose)
-        }.map {
-            if (isEveryFrameUpdated(it)) updateLastConsumed(it)
-            it
         }.filter {
-            isEveryFrameUpdated(it)
+            val isEveryFrameUpdated = isEveryFrameUpdated(it)
+            if (isEveryFrameUpdated) updateLastConsumed(it)
+            println("ZZZ COMB2  $isEveryFrameUpdated")
+            isEveryFrameUpdated
+        }.map { combinedLandmarks ->
+            println("ZZZ COMB3")
+            println("NOWYY ONLANDMARK UPDATED")
+            println(
+                "Frame Combined: \n" +
+                        "Combined Frame Hand: ${combinedLandmarks.hand.frameNumber}: ${combinedLandmarks.hand.handResultBundle?.timeStampFinish} \n" +
+                        //"Combined Frame Face: ${it.face.frameNumber}: ${it.face.faceResultBundle?.timeStampFinish} \n" +
+                        "Combined Frame Pose: ${combinedLandmarks.pose.frameNumber}: ${combinedLandmarks.pose.poseResultBundle?.timeStampFinish}"
+            )
+            extractUpperBodyKeypoints(combinedLandmarks)
         }
     }
 
@@ -58,6 +68,7 @@ class GetUpperBodyLandmarks(
 
     private fun updateLastConsumed(combinedLandmarks: CombinedLandmarks) {
         combinedLandmarks.let {
+            println("ZZZ COMB4444")
             lastConsumedFrame = ConsumedFrames(
                 handConsumed = it.hand.frameNumber,
                 poseConsumed = it.pose.frameNumber
@@ -69,29 +80,23 @@ class GetUpperBodyLandmarks(
 @Singleton
 class ActionRecognitionManager @Inject constructor(
     private val actionPredictionManager: ActionPredictionManager,
-    private val getUpperBodyLandmarks: GetUpperBodyLandmarks,
+    private val getUpperBodyLandmarksUseCase: GetUpperBodyLandmarksUseCase,
 ) {
-    val recognizedActionSentences: StateFlow<List<String>> =
+    val recognizedElements: StateFlow<List<String>> =
         actionPredictionManager.recognizedSentences
-
+    val lastRecognizedElement: StateFlow<String?> = actionPredictionManager.lastRecognizedElement
     private val lastSequence = mutableListOf<List<Float>>()
 
-    suspend fun startActionRecognition() {
+    suspend fun startRecognition() {
         println("NOWYY ACTION RECOGNITION")
-        getUpperBodyLandmarks().collect {
+        getUpperBodyLandmarksUseCase().collect {
             println("NOWYY ONLANDMARK")
             onLandmarkUpdated(it)
         }
     }
 
-    private fun onLandmarkUpdated(combinedLandmarks: CombinedLandmarks) {
-        println("NOWYY ONLANDMARK UPDATED")
-        println(
-            "Frame Combined: \n" +
-                    "Combined Frame Hand: ${combinedLandmarks.hand.frameNumber}: ${combinedLandmarks.hand.handResultBundle?.timeStampFinish} \n" +
-                    //"Combined Frame Face: ${it.face.frameNumber}: ${it.face.faceResultBundle?.timeStampFinish} \n" +
-                    "Combined Frame Pose: ${combinedLandmarks.pose.frameNumber}: ${combinedLandmarks.pose.poseResultBundle?.timeStampFinish}"
-        )
+    private fun onLandmarkUpdated(combinedLandmarks: List<XYZKeypoints>) {
+
         updateLastSequence(combinedLandmarks)
         if (lastSequence.size == 23) {
             println("JAKUB1222 ${lastSequence.size}")
@@ -99,8 +104,8 @@ class ActionRecognitionManager @Inject constructor(
         }
     }
 
-    private fun updateLastSequence(landmarks: CombinedLandmarks) {
-        val keypointArray = extractUpperBodyKeypoints(landmarks).normalize().flattenXYZ()
+    private fun updateLastSequence(landmarks: List<XYZKeypoints>) {
+        val keypointArray = landmarks.normalize().flattenXYZ()
         println("TESTTT KEYPOINT ARRAY ${keypointArray.size} $keypointArray")
         lastSequence.add(keypointArray)
         if (lastSequence.size > 23) lastSequence.removeAt(0)
