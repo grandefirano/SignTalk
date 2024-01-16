@@ -1,10 +1,8 @@
 package com.grandefirano.signtalk.prediction
 
-import com.grandefirano.signtalk.recognition.TranslationChoice
-import com.grandefirano.signtalk.recognition.argmax
-import com.grandefirano.signtalk.recognition.dictionary.DictionaryProvider
-import com.grandefirano.signtalk.recognition.dictionary.Interpreter
-import com.grandefirano.signtalk.recognition.dictionary.PredictionInterpreterProvider
+import com.grandefirano.signtalk.prediction.dictionary.DictionaryProvider
+import com.grandefirano.signtalk.prediction.dictionary.Interpreter
+import com.grandefirano.signtalk.prediction.dictionary.PredictionInterpreterProvider
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import javax.inject.Inject

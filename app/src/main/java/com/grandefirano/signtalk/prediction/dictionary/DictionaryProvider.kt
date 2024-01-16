@@ -1,12 +1,9 @@
-package com.grandefirano.signtalk.recognition.dictionary
+package com.grandefirano.signtalk.prediction.dictionary
 
 import android.content.Context
-import com.grandefirano.signtalk.ml.Pjm10ModelNorm
-import com.grandefirano.signtalk.ml.Pjm10ModelNormV3
-import com.grandefirano.signtalk.ml.Pjm21ModelGruV1
 import com.grandefirano.signtalk.ml.Pjm21ModelLstmV294
 import com.grandefirano.signtalk.ml.PjmLeftHandV3
-import com.grandefirano.signtalk.recognition.TranslationChoice
+import com.grandefirano.signtalk.prediction.TranslationChoice
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import javax.inject.Inject

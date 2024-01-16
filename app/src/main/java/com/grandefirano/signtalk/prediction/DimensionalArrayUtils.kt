@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.recognition
+package com.grandefirano.signtalk.prediction
 
 import org.jetbrains.kotlinx.multik.api.toNDArray
 import org.jetbrains.kotlinx.multik.ndarray.data.get

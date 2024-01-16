@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.camera
+package com.grandefirano.signtalk.recognition
 
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
@@ -6,15 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.grandefirano.signtalk.landmarks.LandmarksManager
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarksResult
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksResult
-import com.grandefirano.signtalk.prediction.ActionRecognitionManager
-import com.grandefirano.signtalk.prediction.StaticRecognitionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService

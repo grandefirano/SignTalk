@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grandefirano.signtalk.R
-import com.grandefirano.signtalk.camera.RecognitionViewModel
 import com.grandefirano.signtalk.ui.theme.SignTalkTheme
 
 @Composable

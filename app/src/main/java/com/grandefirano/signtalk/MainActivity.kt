@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.grandefirano.signtalk.databinding.ActivityMainBinding
-import com.grandefirano.signtalk.camera.RecognitionViewModel
+import com.grandefirano.signtalk.recognition.RecognitionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

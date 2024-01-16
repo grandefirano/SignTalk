@@ -1,4 +1,4 @@
-package com.grandefirano.signtalk.prediction
+package com.grandefirano.signtalk.recognition
 
 import androidx.compose.runtime.mutableStateListOf
 import com.grandefirano.signtalk.landmarks.LandmarksManager
@@ -7,6 +7,7 @@ import com.grandefirano.signtalk.landmarks.flattenXYZ
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarksResult
 import com.grandefirano.signtalk.landmarks.hand.extractHandsXYZKeypoints
 import com.grandefirano.signtalk.landmarks.normalize
+import com.grandefirano.signtalk.prediction.StaticPredictionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -32,6 +33,7 @@ class StaticRecognitionManager @Inject constructor(
     private val threshold = 0.8
 
     private val lastPredictions = mutableListOf<String>()
+
     suspend fun startStaticRecognition() {
         handLandmarks.collect {
             onLandmarksUpdated(it)

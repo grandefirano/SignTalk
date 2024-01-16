@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import android.util.Range
 import android.view.LayoutInflater
@@ -28,6 +27,7 @@ import com.grandefirano.signtalk.PermissionsFragment
 import com.grandefirano.signtalk.R
 import com.grandefirano.signtalk.databinding.FragmentCameraBinding
 import com.grandefirano.signtalk.recognition.RecognitionPanel
+import com.grandefirano.signtalk.recognition.RecognitionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
