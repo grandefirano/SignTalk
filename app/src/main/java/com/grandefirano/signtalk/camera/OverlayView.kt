@@ -6,19 +6,18 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
-import com.grandefirano.signtalk.landmarks.hand.HandLandmarksRepository
+import com.grandefirano.signtalk.landmarks.hand.HandLandmarksManager
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 import com.grandefirano.signtalk.R
-import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksRepository
+import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksManager
 import kotlin.math.max
 
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
 
-    //private var resultsFace: FaceLandmarkerResult? = null
     private var resultsPose: PoseLandmarkerResult? = null
     private var resultsHand: HandLandmarkerResult? = null
     private var linePaint = Paint()
@@ -33,17 +32,11 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun clear() {
-        //resultsFace = null
         resultsHand = null
         linePaint.reset()
         pointPaint.reset()
         invalidate()
         initPaints()
-    }
-
-    fun clearFace() {
-        //resultsFace = null
-        invalidate()
     }
 
     private fun initPaints() {
@@ -59,7 +52,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        //drawFace(canvas)
         drawHand(canvas)
         drawPose(canvas)
     }
@@ -123,61 +115,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-//    private fun drawFace(canvas: Canvas) {
-//
-//        resultsFace?.let { faceLandmarkerResult ->
-//            if (faceLandmarkerResult.faceBlendshapes().isPresent) {
-//                faceLandmarkerResult.faceBlendshapes().get().forEach {
-//                    it.forEach {
-//                        Log.e(TAG, it.displayName() + " " + it.score())
-//                    }
-//                }
-//            }
-//
-//            for (landmark in faceLandmarkerResult.faceLandmarks()) {
-//                for (normalizedLandmark in landmark) {
-//                    canvas.drawPoint(
-//                        normalizedLandmark.x() * imageWidth * scaleFactor,
-//                        normalizedLandmark.y() * imageHeight * scaleFactor,
-//                        pointPaint
-//                    )
-//                }
-//
-//
-//                FaceLandmarker.FACE_LANDMARKS_CONNECTORS.forEach {
-//                    canvas.drawLine(
-//                        landmark.get(it!!.start())
-//                            .x() * imageWidth * scaleFactor,
-//                        landmark.get(it.start())
-//                            .y() * imageHeight * scaleFactor,
-//                        landmark.get(it.end())
-//                            .x() * imageWidth * scaleFactor,
-//                        landmark.get(it.end())
-//                            .y() * imageHeight * scaleFactor,
-//                        linePaint
-//                    )
-//                }
-//            }
-//        }
-//    }
-
-//    fun setFaceResults(faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?) {
-//        println("HANDYY face result")
-//        resultsFace = faceResultBundle?.result
-//        faceResultBundle?.let {
-//            setResultsCommon(it.inputImageHeight, it.inputImageWidth)
-//        }
-//    }
-
-    fun setPoseResults(poseResultBundle: PoseLandmarksRepository.PoseResultBundle?) {
+    fun setPoseResults(poseResultBundle: PoseLandmarksManager.PoseResultBundle?) {
         resultsPose = poseResultBundle?.result
         poseResultBundle?.let {
             setResultsCommon(it.inputImageHeight, it.inputImageWidth)
         }
     }
 
-    fun setHandResults(handResultBundle: HandLandmarksRepository.HandResultBundle?) {
-        println("HANDYY hand result")
+    fun setHandResults(handResultBundle: HandLandmarksManager.HandResultBundle?) {
         resultsHand = handResultBundle?.results
         handResultBundle?.let {
             setResultsCommon(it.inputImageHeight, it.inputImageWidth)
@@ -191,8 +136,56 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         invalidate()
     }
 
+    /** This can be used if the face data is expected
+     *
+     *     private fun drawFace(canvas: Canvas) {
+     *
+     *         resultsFace?.let { faceLandmarkerResult ->
+     *             if (faceLandmarkerResult.faceBlendshapes().isPresent) {
+     *                 faceLandmarkerResult.faceBlendshapes().get().forEach {
+     *                     it.forEach {
+     *                         Log.e(TAG, it.displayName() + " " + it.score())
+     *                     }
+     *                 }
+     *             }
+     *
+     *             for (landmark in faceLandmarkerResult.faceLandmarks()) {
+     *                 for (normalizedLandmark in landmark) {
+     *                     canvas.drawPoint(
+     *                         normalizedLandmark.x() * imageWidth * scaleFactor,
+     *                         normalizedLandmark.y() * imageHeight * scaleFactor,
+     *                         pointPaint
+     *                     )
+     *                 }
+     *
+     *
+     *                 FaceLandmarker.FACE_LANDMARKS_CONNECTORS.forEach {
+     *                     canvas.drawLine(
+     *                         landmark.get(it!!.start())
+     *                             .x() * imageWidth * scaleFactor,
+     *                         landmark.get(it.start())
+     *                             .y() * imageHeight * scaleFactor,
+     *                         landmark.get(it.end())
+     *                             .x() * imageWidth * scaleFactor,
+     *                         landmark.get(it.end())
+     *                             .y() * imageHeight * scaleFactor,
+     *                         linePaint
+     *                     )
+     *                 }
+     *             }
+     *         }
+     *     }
+     *
+     *     fun setFaceResults(faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?) {
+     *         println("HANDYY face result")
+     *         resultsFace = faceResultBundle?.result
+     *         faceResultBundle?.let {
+     *             setResultsCommon(it.inputImageHeight, it.inputImageWidth)
+     *         }
+     *     }
+     */
+
     companion object {
         private const val LANDMARK_STROKE_WIDTH = 4F
-        private const val TAG = "Face Landmarker Overlay"
     }
 }

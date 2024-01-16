@@ -23,9 +23,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation
 import com.grandefirano.signtalk.PermissionsFragment
+import com.grandefirano.signtalk.R
 import com.grandefirano.signtalk.databinding.FragmentCameraBinding
-import com.grandefirano.signtalk.recognition.RecognizedSentences
+import com.grandefirano.signtalk.recognition.RecognitionPanel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -40,7 +42,7 @@ class CameraFragment : Fragment() {
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
 
-    private val viewModel: CameraViewModel by activityViewModels()
+    private val viewModel: RecognitionViewModel by activityViewModels()
 
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -49,12 +51,10 @@ class CameraFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Make sure that all permissions are still present, since the
-        // user could have removed them while the app was in paused state.
         if (!PermissionsFragment.hasPermissions(requireContext())) {
-//            Navigation.findNavController(
-//                requireActivity(), R.id.fragment_container
-//            ).navigate(R.id.action_camera_to_permissions)
+            Navigation.findNavController(
+                requireActivity(), R.id.fragment_container
+            ).navigate(R.id.action_camera_to_permissions)
         }
         viewModel.setupLandmarkerIfClosed()
     }
@@ -81,7 +81,7 @@ class CameraFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
-                    RecognizedSentences()
+                    RecognitionPanel()
                 }
             }
         }
@@ -91,82 +91,54 @@ class CameraFragment : Fragment() {
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Initialize our background executor
 
-        // Wait for the views to be properly laid out
         fragmentCameraBinding.viewFinder.post {
-            // Set up the camera and its use cases
             setUpCamera()
         }
+        setUpOverlayDrawing()
+    }
+
+    private fun setUpOverlayDrawing() {
         lifecycleScope.launch {
-//            launch {
-//                println("NOWYY ONVIEW CREATED")
-//                //TODO:switch here
-//
-////                viewModel.startActionRecognition()
-//                //viewModel.startStaticRecognition()
-//            }
             launch {
-                setHandDrawing()
+
+                viewModel.handLandmarks.collect {
+                    fragmentCameraBinding.overlay.setHandResults(it.handResultBundle)
+                    fragmentCameraBinding.overlay.invalidate()
+                }
             }
             launch {
-                setPoseDrawing()
+                viewModel.poseLandmarks.collect {
+                    fragmentCameraBinding.overlay.setPoseResults(it.poseResultBundle)
+                    fragmentCameraBinding.overlay.invalidate()
+                }
             }
         }
     }
 
-    private suspend fun setHandDrawing() {
-        viewModel.handLandmarks.collect {
-            fragmentCameraBinding.overlay.setHandResults(it.handResultBundle)
-            fragmentCameraBinding.overlay.invalidate()
-        }
-    }
-
-    private suspend fun setPoseDrawing() {
-        viewModel.poseLandmarks.collect {
-            fragmentCameraBinding.overlay.setPoseResults(it.poseResultBundle)
-            fragmentCameraBinding.overlay.invalidate()
-        }
-    }
-
-    // Initialize CameraX, and prepare to bind the camera use cases
     private fun setUpCamera() {
         val cameraProviderFuture =
             ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener(
             {
-                // CameraProvider
                 cameraProvider = cameraProviderFuture.get()
-
-                // Build and bind the camera use cases
                 bindCameraUseCases()
             }, ContextCompat.getMainExecutor(requireContext())
         )
     }
 
-    private var counterXX = 0
-    private var counterXX2222 = 0
-    private var counterXXSaved = 0L
-
-    // Declare and bind preview, capture and analysis use cases
     @SuppressLint("UnsafeOptInUsageError")
     private fun bindCameraUseCases() {
 
-        // CameraProvider
         val cameraProvider = cameraProvider
             ?: throw IllegalStateException("Camera initialization failed.")
 
         val cameraSelector =
             CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build()
 
-
-        // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
             .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
             .build()
-
-        // ImageAnalysis. Using RGBA 8888 to match how our models work
-
 
         val imageAnalyzerBuilder =
             ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
@@ -182,41 +154,18 @@ class CameraFragment : Fragment() {
             CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
             Range<Int>(15, 15)
         )
-        //val imageAnalysis = builder.build()
         imageAnalyzer = imageAnalyzerBuilder.build()
-            // The analyzer can then be assigned to the instance
             .also {
                 it.setAnalyzer(viewModel.backgroundExecutor) { image ->
-                    //todo here
-                    val finishTimeMs = SystemClock.uptimeMillis()
-                    //TODO test if frames are not lost here
-                    val newXX = finishTimeMs / 1000
-                    if (counterXXSaved == newXX) {
-                        counterXX++
-                    } else {
-                        println("FFFF TIME IN SECCCC $counterXXSaved  frames: $counterXX")
-                        counterXX = 0
-                        counterXXSaved = newXX
-                    }
-                    //if(counterXX2222 == 1) {
-                    viewModel.detectCombined(image)
-                    //   counterXX2222=0
-                    //}
-                    // counterXX2222++
+                    viewModel.detectCombinedLandmarks(image)
                 }
             }
-
-        // Must unbind the use-cases before rebinding them
         cameraProvider.unbindAll()
 
         try {
-            // A variable number of use-cases can be passed here -
-            // camera provides access to CameraControl & CameraInfo
             camera = cameraProvider.bindToLifecycle(
                 this, cameraSelector, preview, imageAnalyzer
             )
-
-            // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)

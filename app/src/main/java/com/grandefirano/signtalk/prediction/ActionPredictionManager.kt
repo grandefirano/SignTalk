@@ -21,17 +21,12 @@ class ActionPredictionManager @Inject constructor(
     private val interpreterProvider: PredictionInterpreterProvider,
 ) {
 
-//    private val _translationChoice: MutableStateFlow<TranslationChoice> =
-//        MutableStateFlow(TranslationChoice.PJM_POLISH)
-//    val translationChoice: StateFlow<TranslationChoice> = _translationChoice
-
     private var interpreter: Interpreter =
         interpreterProvider.getPredictionInterpreter(TranslationChoice.PJM_POLISH,true)
 
     private var dictionaryLanguage: List<String> =
         dictionaryProvider.getDictionary(TranslationChoice.PJM_POLISH,true)
 
-    //TODO handle the flow below
     private val _recognizedSentences: MutableStateFlow<MutableList<String>> =
         MutableStateFlow(mutableStateListOf())
     val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
@@ -42,7 +37,6 @@ class ActionPredictionManager @Inject constructor(
 
     private val lastPredictions = mutableListOf<Int>()
     fun predict(sequence: List<List<Float>>) {
-        println("NOWYY PREDICT ACTION")
         val floatArray = sequence.toFloatArray()
         val inputSize = intArrayOf(1, 23, 195)
         val inputFeature = TensorBuffer.createFixedSize(inputSize, DataType.FLOAT32)
@@ -51,20 +45,22 @@ class ActionPredictionManager @Inject constructor(
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
         maxIndex?.let {
-            println("NOWYY ${dictionaryLanguage[it]}")
             updateLastPrediction(maxIndex)
             checkLastPredictions(maxIndex, list)
         }
     }
 
-//    fun switchTranslation(translationChoice: TranslationChoice) {
-//        _translationChoice.value = translationChoice
-//        interpreter = interpreterProvider.getPredictionInterpreter(translationChoice)
-//        dictionaryLanguage = dictionaryProvider.getDictionary(translationChoice)
-//    }
+/**    This can be used when more languages are implemented
+*
+*    fun switchTranslation(translationChoice: TranslationChoice) {
+*        _translationChoice.value = translationChoice
+*        interpreter = interpreterProvider.getPredictionInterpreter(translationChoice)
+*        dictionaryLanguage = dictionaryProvider.getDictionary(translationChoice)
+*    }
+*
+*/
 
     private fun updateLastPrediction(prediction: Int) {
-
         lastPredictions.add(prediction)
         if (lastPredictions.size > 5) lastPredictions.removeAt(0)
     }
@@ -88,7 +84,6 @@ class ActionPredictionManager @Inject constructor(
                 } else {
                     addSentenceItem(currentSentence)
                 }
-                println("GUESS ${dictionaryLanguage[currentIndex]}")
             }
         }
     }

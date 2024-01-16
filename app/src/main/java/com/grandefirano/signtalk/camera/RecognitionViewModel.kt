@@ -13,11 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
@@ -26,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
-class CameraViewModel @Inject constructor(
+class RecognitionViewModel @Inject constructor(
     private val landmarksManager: LandmarksManager,
     private val actionRecognitionManager: ActionRecognitionManager,
     private val staticRecognitionManager: StaticRecognitionManager,
@@ -38,19 +35,6 @@ class CameraViewModel @Inject constructor(
     val handLandmarks: StateFlow<HandLandmarksResult> = landmarksManager.handLandmarks
     val poseLandmarks: StateFlow<PoseLandmarksResult> = landmarksManager.poseLandmarks
 
-    //TODO: SWITCH HERE
-    //val recognizedActionSentences: StateFlow<List<String>> = actionRecognitionManager.recognizedActionSentences
-    private val recognizedActionSentences: Flow<String?> =
-        actionRecognitionManager.recognizedElements.map {
-            println("ZZZZZ new action item ${it.lastOrNull()}")
-            it.lastOrNull()
-        }
-
-    //    private val recognizedStaticSentences: Flow<String?> =
-//        staticRecognitionManager.recognizedElements.map {
-//            println("ZZZZZ new static item ${it.lastOrNull()}")
-//            it.lastOrNull()
-//        }
     private val lastRecognizedStaticElement = staticRecognitionManager.lastRecognizedElement
     private val lastRecognizedActionElement = actionRecognitionManager.lastRecognizedElement
     val allRecognizedElements = MutableStateFlow(emptyList<String>())
@@ -79,13 +63,6 @@ class CameraViewModel @Inject constructor(
             }
         }
     }
-    //val translationChoice: StateFlow<TranslationChoice> = actionPredictionManager.translationChoice
-
-//    fun switchTranslation(translationChoice: TranslationChoice) {
-//        //TODO: To prevent mixing languages guesses when language is changed
-//        actionRecognizer.clearLastSequence()
-//        predictionManager.switchTranslation(translationChoice)
-//    }
 
     fun setupLandmarkerIfClosed() {
         backgroundExecutor.execute {
@@ -97,8 +74,8 @@ class CameraViewModel @Inject constructor(
         backgroundExecutor.execute { landmarksManager.cleanLandmarker() }
     }
 
-    fun detectCombined(imageProxy: ImageProxy) {
-        landmarksManager.detectCombined(imageProxy)
+    fun detectCombinedLandmarks(imageProxy: ImageProxy) {
+        landmarksManager.detectCombinedLandmarks(imageProxy)
     }
 
     fun shutDownExecutor() {
@@ -114,12 +91,11 @@ class CameraViewModel @Inject constructor(
         currentRecognitionJob = scope.launch { recognition() }
     }
 
-    suspend fun startActionRecognition() {
-        println("NOWYY ACTION RECOGNITION VM")
+    private suspend fun startActionRecognition() {
         actionRecognitionManager.startRecognition()
     }
 
-    suspend fun startStaticRecognition() {
+    private suspend fun startStaticRecognition() {
         staticRecognitionManager.startStaticRecognition()
     }
 }

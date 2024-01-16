@@ -17,15 +17,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class PoseLandmarksRepository@Inject constructor(
+class PoseLandmarksManager @Inject constructor(
     @ApplicationContext val context: Context,
 ) {
 
     val poseLandmarks: MutableStateFlow<PoseLandmarksResult> =
         MutableStateFlow(initPoseLandmarkerResultWrapper())
-
-    // For this example this needs to be a var so it can be reset on changes.
-    // If the Pose Landmarker will not change, a lazy val would be preferable.
     private var poseLandmarker: PoseLandmarker? = null
 
     init {
@@ -37,22 +34,12 @@ class PoseLandmarksRepository@Inject constructor(
         poseLandmarker = null
     }
 
-    // Return running status of PoseLandmarkerHelper
     fun isClose(): Boolean {
         return poseLandmarker == null
     }
 
-    // Initialize the Pose landmarker using current settings on the
-    // thread that is using it. CPU can be used with Landmarker
-    // that are created on the main thread and used on a background thread, but
-    // the GPU delegate needs to be used on the thread that initialized the
-    // Landmarker
     fun setupPoseLandmarker() {
-        // Set general pose landmarker options
         val baseOptionBuilder = BaseOptions.builder()
-
-        // Use the specified hardware for running the model. Default to CPU
-
         baseOptionBuilder.setDelegate(Delegate.CPU)
 
         val modelName = "pose_landmarker_lite.task"
@@ -61,8 +48,6 @@ class PoseLandmarksRepository@Inject constructor(
 
         try {
             val baseOptions = baseOptionBuilder.build()
-            // Create an option builder with base options and specific
-            // options only use for Pose Landmarker.
             val optionsBuilder =
                 PoseLandmarker.PoseLandmarkerOptions.builder()
                     .setBaseOptions(baseOptions)
@@ -70,8 +55,6 @@ class PoseLandmarksRepository@Inject constructor(
                     .setMinTrackingConfidence(DEFAULT_POSE_TRACKING_CONFIDENCE)
                     .setMinPosePresenceConfidence(DEFAULT_POSE_PRESENCE_CONFIDENCE)
                     .setRunningMode(RunningMode.LIVE_STREAM)
-
-            // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
             optionsBuilder
                 .setResultListener(this::returnLivestreamResult)
                 .setErrorListener(this::returnLivestreamError)
@@ -89,10 +72,9 @@ class PoseLandmarksRepository@Inject constructor(
                     .message
             )
         } catch (e: RuntimeException) {
-            // This occurs if the model being used does not support GPU
             onError(
                 "Pose Landmarker failed to initialize. See error logs for " +
-                        "details", GPU_ERROR
+                        "details"
             )
             Log.e(
                 TAG,
@@ -101,16 +83,11 @@ class PoseLandmarksRepository@Inject constructor(
         }
     }
 
-    // Run pose landmark using MediaPipe Pose Landmarker API
     @VisibleForTesting
     fun detectAsync(mpImage: MPImage, frameTime: Long) {
         poseLandmarker?.detectAsync(mpImage, frameTime)
-        // As we're using running mode LIVE_STREAM, the landmark result will
-        // be returned in returnLivestreamResult function
     }
 
-
-    // Return the landmark result to this PoseLandmarkerHelper's caller
     private fun returnLivestreamResult(
         result: PoseLandmarkerResult,
         input: MPImage
@@ -138,13 +115,10 @@ class PoseLandmarksRepository@Inject constructor(
         }
     }
 
-    private fun onError(error: String, errorCode: Int = OTHER_ERROR) {
+    private fun onError(error: String) {
         println("ERROR APP: $error")
     }
 
-
-    // Return errors thrown during detection to this PoseLandmarkerHelper's
-    // caller
     private fun returnLivestreamError(error: RuntimeException) {
         onError(
             error.message ?: "An unknown error has occurred"

@@ -9,7 +9,6 @@ import com.grandefirano.signtalk.landmarks.hand.extractHandsXYZKeypoints
 import com.grandefirano.signtalk.landmarks.normalize
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -67,7 +66,6 @@ class StaticRecognitionManager @Inject constructor(
                 } else {
                     addRecognizedItem(currentSentence)
                 }
-                println("GUESS $currentSentence")
             }
         }
     }

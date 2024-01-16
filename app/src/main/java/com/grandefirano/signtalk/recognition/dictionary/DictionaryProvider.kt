@@ -2,6 +2,9 @@ package com.grandefirano.signtalk.recognition.dictionary
 
 import android.content.Context
 import com.grandefirano.signtalk.ml.Pjm10ModelNorm
+import com.grandefirano.signtalk.ml.Pjm10ModelNormV3
+import com.grandefirano.signtalk.ml.Pjm21ModelGruV1
+import com.grandefirano.signtalk.ml.Pjm21ModelLstmV294
 import com.grandefirano.signtalk.ml.PjmLeftHandV3
 import com.grandefirano.signtalk.recognition.TranslationChoice
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,7 +13,6 @@ import javax.inject.Inject
 
 class DictionaryProvider @Inject constructor() {
     fun getDictionary(translationChoice: TranslationChoice, isAction: Boolean): List<String> {
-        //TODO: Add longer dictionary - at least 30 words
         return when (isAction) {
             true -> when (translationChoice) {
                 TranslationChoice.PJM_POLISH -> getPolishActionDictionary()
@@ -45,7 +47,7 @@ interface Interpreter {
 }
 
 class PJMPolishActionInterpreter(context: Context) : Interpreter {
-    private val model = Pjm10ModelNorm.newInstance(context)
+    private val model = Pjm21ModelLstmV294.newInstance(context)
 
     override fun interpret(input: TensorBuffer): TensorBuffer {
         return model.process(input).outputFeature0AsTensorBuffer

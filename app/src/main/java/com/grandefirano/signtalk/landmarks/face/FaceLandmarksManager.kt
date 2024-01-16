@@ -10,15 +10,13 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
 import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
-import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.GPU_ERROR
-import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.OTHER_ERROR
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class FaceLandmarkerHelper @Inject constructor(
+class FaceLandmarksManager @Inject constructor(
     @ApplicationContext val context: Context,
 ) {
 
@@ -26,30 +24,19 @@ class FaceLandmarkerHelper @Inject constructor(
         MutableStateFlow(initFaceLandmarkerResultWrapper())
     val faceLandmarks: StateFlow<FaceLandmarkerResultWrapper> = _faceLandmarks
 
-    // For this example this needs to be a var so it can be reset on changes.
-    // If the Face Landmarker will not change, a lazy val would be preferable.
     private var faceLandmarker: FaceLandmarker? = null
-
 
     fun clearFaceLandmarker() {
         faceLandmarker?.close()
         faceLandmarker = null
     }
 
-    // Return running status of FaceLandmarkerHelper
     fun isClose(): Boolean {
         return faceLandmarker == null
     }
 
-    // Initialize the Face landmarker using current settings on the
-    // thread that is using it. CPU can be used with Landmarker
-    // that are created on the main thread and used on a background thread, but
-    // the GPU delegate needs to be used on the thread that initialized the
-    // Landmarker
     fun setupFaceLandmarker() {
-        // Set general face landmarker options
         val baseOptionBuilder = BaseOptions.builder()
-
         baseOptionBuilder.setDelegate(Delegate.CPU)
         baseOptionBuilder.setModelAssetPath(MP_FACE_LANDMARKER_TASK)
 
@@ -78,10 +65,9 @@ class FaceLandmarkerHelper @Inject constructor(
                     .message
             )
         } catch (e: RuntimeException) {
-            // This occurs if the model being used does not support GPU
             onError(
                 "DDFace Landmarker failed to initialize. See error logs for " +
-                        "details", GPU_ERROR
+                        "details"
             )
             Log.e(
                 TAG,
@@ -90,21 +76,15 @@ class FaceLandmarkerHelper @Inject constructor(
         }
     }
 
-    private fun onError(error: String, errorCode: Int = OTHER_ERROR) {
+    private fun onError(error: String) {
         println("ERROR APP: $error")
     }
 
-    // Run face face landmark using MediaPipe Face Landmarker API
     @VisibleForTesting
     fun detectAsync(mpImage: MPImage, frameTime: Long) {
         faceLandmarker?.detectAsync(mpImage, frameTime)
-        // As we're using running mode LIVE_STREAM, the landmark result will
-        // be returned in returnLivestreamResult function
     }
 
-    // Return the landmark result to this FaceLandmarkerHelper's caller
-    private var counterXX = 0
-    private var counterXXSaved = 0L
     private fun returnLivestreamResult(
         result: FaceLandmarkerResult,
         input: MPImage
@@ -112,16 +92,6 @@ class FaceLandmarkerHelper @Inject constructor(
         if (result.faceLandmarks().size > 0) {
             val finishTimeMs = SystemClock.uptimeMillis()
             val inferenceTime = finishTimeMs - result.timestampMs()
-            //TODO test if frames are not lost here
-            val newXX = finishTimeMs/1000
-            if(counterXXSaved == newXX){
-                counterXX++
-            }else{
-                println("TIME IN SECCCC $counterXXSaved  frames: $counterXX")
-                counterXX=0
-                counterXXSaved = newXX
-            }
-
             updateFace(
                 FaceResultBundle(
                     result,
@@ -153,8 +123,6 @@ class FaceLandmarkerHelper @Inject constructor(
         }
     }
 
-    // Return errors thrown during detection to this FaceLandmarkerHelper's
-    // caller
     private fun returnLivestreamError(error: RuntimeException) {
         onError(
             error.message ?: "An unknown error has occurred"

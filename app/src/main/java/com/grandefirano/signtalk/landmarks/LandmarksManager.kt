@@ -1,23 +1,19 @@
 package com.grandefirano.signtalk.landmarks
 
-import android.os.SystemClock
 import androidx.camera.core.ImageProxy
 import com.grandefirano.signtalk.camera.detectLiveStream
-import com.grandefirano.signtalk.landmarks.hand.HandLandmarksRepository
+import com.grandefirano.signtalk.landmarks.hand.HandLandmarksManager
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarksResult
-import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksRepository
+import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksManager
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksResult
-import com.grandefirano.signtalk.prediction.CombinedLandmarks
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class LandmarksManager @Inject constructor(
-    private val poseLandmarksRepository: PoseLandmarksRepository,
-    private val handLandmarksRepository: HandLandmarksRepository,
+    private val poseLandmarksManager: PoseLandmarksManager,
+    private val handLandmarksManager: HandLandmarksManager,
 ) {
 
     companion object {
@@ -26,42 +22,36 @@ class LandmarksManager @Inject constructor(
     }
 
     val poseLandmarks: StateFlow<PoseLandmarksResult> =
-        poseLandmarksRepository.poseLandmarks
+        poseLandmarksManager.poseLandmarks
     val handLandmarks: StateFlow<HandLandmarksResult> =
-        handLandmarksRepository.handLandmarks
-
-    private var counterXX = 0
-    private var counterXX2222 = 0
-    private var counterXXSaved = 0L
-
+        handLandmarksManager.handLandmarks
 
     init {
-        handLandmarksRepository.setupHandLandmarker()
-        poseLandmarksRepository.setupPoseLandmarker()
+        handLandmarksManager.setupHandLandmarker()
+        poseLandmarksManager.setupPoseLandmarker()
     }
 
     fun setupLandmarkerIfClosed() {
-        if (handLandmarksRepository.isClose()) {
-            handLandmarksRepository.setupHandLandmarker()
+        if (handLandmarksManager.isClose()) {
+            handLandmarksManager.setupHandLandmarker()
         }
-        if (poseLandmarksRepository.isClose()) {
-            poseLandmarksRepository.setupPoseLandmarker()
+        if (poseLandmarksManager.isClose()) {
+            poseLandmarksManager.setupPoseLandmarker()
         }
     }
 
     fun cleanLandmarker() {
-        handLandmarksRepository.clearHandLandmarker()
-        poseLandmarksRepository.clearPoseLandmarker()
+        handLandmarksManager.clearHandLandmarker()
+        poseLandmarksManager.clearPoseLandmarker()
     }
 
-    fun detectCombined(imageProxy: ImageProxy) {
+    fun detectCombinedLandmarks(imageProxy: ImageProxy) {
         detectLiveStream(
             imageProxy = imageProxy,
             isFrontCamera = true
         ) { mpImage, frameTime ->
-            //TODO: maybe detect instead of detectAsync but on coroutines back thread
-            handLandmarksRepository.detectAsync(mpImage, frameTime)
-            poseLandmarksRepository.detectAsync(mpImage, frameTime)
+            handLandmarksManager.detectAsync(mpImage, frameTime)
+            poseLandmarksManager.detectAsync(mpImage, frameTime)
         }
     }
 }

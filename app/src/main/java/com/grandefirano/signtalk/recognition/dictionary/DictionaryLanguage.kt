@@ -1,7 +1,7 @@
 package com.grandefirano.signtalk.recognition.dictionary
 
 fun getPolishActionDictionary(): List<String> {
-    return listOf("Dziękuję", "Proszę", "Przepraszam","Od","Jest","Który","Ja","Gdzie","Mam")
+    return listOf("dziękuję","proszę","przepraszam","od","jest","który","ja","gdzie","ty","imię","nazwisko","jeśli","ile","duży","mało","dobrze","źle","wiem","dom","mieszkać","kocham")
 }
 
 fun getPolishStaticDictionary(): List<String> {

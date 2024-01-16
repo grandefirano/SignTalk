@@ -7,13 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.grandefirano.signtalk.databinding.ActivityMainBinding
-import com.grandefirano.signtalk.camera.CameraViewModel
+import com.grandefirano.signtalk.camera.RecognitionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
-    private val viewModel : CameraViewModel by viewModels()
+    private val viewModel : RecognitionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         activityMainBinding.navigation.setupWithNavController(navController)
         activityMainBinding.navigation.setOnNavigationItemReselectedListener {
-            // ignore the reselection
         }
     }
 

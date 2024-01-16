@@ -1,14 +1,14 @@
 package com.grandefirano.signtalk.landmarks.face
 
 data class FaceLandmarkerResultWrapper(
-    val faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?,
+    val faceResultBundle: FaceLandmarksManager.FaceResultBundle?,
     val frameNumber: Int,
 )
 
 fun initFaceLandmarkerResultWrapper(): FaceLandmarkerResultWrapper = FaceLandmarkerResultWrapper(null, 0)
 
 fun FaceLandmarkerResultWrapper.withNewLandmark(
-    faceResultBundle: FaceLandmarkerHelper.FaceResultBundle?
+    faceResultBundle: FaceLandmarksManager.FaceResultBundle?
 ): FaceLandmarkerResultWrapper {
     val nextNumber = this.frameNumber.plus(1)
     return this.copy(

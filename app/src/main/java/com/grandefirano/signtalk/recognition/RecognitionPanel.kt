@@ -43,33 +43,26 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.grandefirano.signtalk.R
-import com.grandefirano.signtalk.camera.CameraViewModel
+import com.grandefirano.signtalk.camera.RecognitionViewModel
 import com.grandefirano.signtalk.ui.theme.SignTalkTheme
 
 @Composable
-fun RecognizedSentences(viewModel: CameraViewModel = hiltViewModel()) {
+fun RecognitionPanel(viewModel: RecognitionViewModel = hiltViewModel()) {
     val recognizedSentences by viewModel.allRecognizedElements.collectAsStateWithLifecycle()
-    //val translationChoice by viewModel.translationChoice.collectAsStateWithLifecycle()
-    //val onTranslationChange: (TranslationChoice) -> Unit = {}//viewModel::switchTranslation
     val coroutineScope = rememberCoroutineScope()
     var isActionRecognitionMode by remember { mutableStateOf(true) }
     LaunchedEffect(isActionRecognitionMode) {
-        println("ZZZZZ launch effect happened")
         viewModel.switchRecognitionModel(isActionRecognitionMode, coroutineScope)
     }
     RecognizedSentencesContent(
         recognizedSentences = recognizedSentences,
         onRecognitionModeChange = {
-            println("ZZZZZ Change happened")
             isActionRecognitionMode = it
         },
         isActionMode = isActionRecognitionMode
-        //translationChoice = translationChoice,
-        //onTranslationChange = onTranslationChange
     )
 }
 
-//TODO: to można zeskrinować
 @Composable
 fun RecognizedSentencesContent(
     recognizedSentences: List<String>,
@@ -102,35 +95,35 @@ fun RecognizedSentencesContent(
         }
     }
 }
-
-@Composable
-fun LanguageSwitch(
-    translationChoice: TranslationChoice,
-    onTranslationChange: (TranslationChoice) -> Unit
-) {
-    println("NEWWW TRANSLATION CHOSEEEN $translationChoice")
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = "PJM")
-//        Switch(
-//            checked = translationChoice == TranslationChoice.ASL_ENGLISH,
-//            onCheckedChange = {
-//                val newValue = when (translationChoice) {
-//                    TranslationChoice.PJM_POLISH -> TranslationChoice.ASL_ENGLISH
-//                    TranslationChoice.ASL_ENGLISH -> TranslationChoice.PJM_POLISH
-//                }
-//                onTranslationChange(newValue)
-//            }
-//        )
-        Text(text = "ASL")
-    }
-}
+/**This can be used when there are two languages implemented
+ *
+ *@Composable
+ * fun LanguageSwitch(
+ *     translationChoice: TranslationChoice,
+ *     onTranslationChange: (TranslationChoice) -> Unit
+ * ) {
+ *     Row(verticalAlignment = Alignment.CenterVertically) {
+ *         Text(text = "PJM")
+ *         Switch(
+ *             checked = translationChoice == TranslationChoice.ASL_ENGLISH,
+ *             onCheckedChange = {
+ *                 val newValue = when (translationChoice) {
+ *                     TranslationChoice.PJM_POLISH -> TranslationChoice.ASL_ENGLISH
+ *                     TranslationChoice.ASL_ENGLISH -> TranslationChoice.PJM_POLISH
+ *                 }
+ *                 onTranslationChange(newValue)
+ *             }
+ *         )
+ *         Text(text = "ASL")
+ *     }
+ * }
+*/
 
 @Composable
 fun RecognitionModeSwitch(
     isAction: Boolean,
     onRecognitionModeChange: (Boolean) -> Unit
 ) {
-    //println("NEWWW TRANSLATION CHOSEEEN $translationChoice")
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             painterResource(id = R.drawable.static_recognition),
@@ -227,21 +220,3 @@ fun RecognizedSentencesPreview() {
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun RecognizedSentencesPreview() {
-//    val recognizedSentences = listOf("Dziękuję", "Przepraszam", "Dobranoc")
-//    SignTalkTheme {
-//        Surface(
-//            modifier = Modifier.fillMaxWidth(),
-//            color = MaterialTheme.colorScheme.background
-//        ) {
-//            RecognizedSentencesContent(
-//                recognizedSentences = recognizedSentences,
-//                //translationChoice = TranslationChoice.ASL_ENGLISH,
-//                //onTranslationChange = {}
-//            )
-//        }
-//    }
-//}

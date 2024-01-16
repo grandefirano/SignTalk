@@ -17,43 +17,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-class HandLandmarksRepository@Inject constructor(
+class HandLandmarksManager@Inject constructor(
     @ApplicationContext val context: Context,
 ) {
     val handLandmarks: MutableStateFlow<HandLandmarksResult> =
         MutableStateFlow(initHandLandmarkerResultWrapper())
-
-    // For this example this needs to be a var so it can be reset on changes.
-    // If the Hand Landmarker will not change, a lazy val would be preferable.
     private var handLandmarker: HandLandmarker? = null
 
     fun clearHandLandmarker() {
         handLandmarker?.close()
         handLandmarker = null
     }
-
-    // Return running status of HandLandmarkerHelper
     fun isClose(): Boolean {
         return handLandmarker == null
     }
 
-    // Initialize the Hand landmarker using current settings on the
-    // thread that is using it. CPU can be used with Landmarker
-    // that are created on the main thread and used on a background thread, but
-    // the GPU delegate needs to be used on the thread that initialized the
-    // Landmarker
     fun setupHandLandmarker() {
-        // Set general hand landmarker options
         val baseOptionBuilder = BaseOptions.builder()
-
-        // Use the specified hardware for running the model. Default to CPU
         baseOptionBuilder.setDelegate(Delegate.CPU)
         baseOptionBuilder.setModelAssetPath(MP_HAND_LANDMARKER_TASK)
 
         try {
             val baseOptions = baseOptionBuilder.build()
-            // Create an option builder with base options and specific
-            // options only use for Hand Landmarker.
             val options = HandLandmarker.HandLandmarkerOptions.builder()
                 .setBaseOptions(baseOptions)
                 .setMinHandDetectionConfidence(DEFAULT_HAND_DETECTION_CONFIDENCE)
@@ -68,7 +53,7 @@ class HandLandmarksRepository@Inject constructor(
                 HandLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
             onError(
-                "AAHand Landmarker failed to initialize. See error logs for " +
+                "AHand Landmarker failed to initialize. See error logs for " +
                         "details"
             )
             Log.e(
@@ -76,10 +61,9 @@ class HandLandmarksRepository@Inject constructor(
                     .message
             )
         } catch (e: RuntimeException) {
-            // This occurs if the model being used does not support GPU
             onError(
                 "BBHand Landmarker failed to initialize. See error logs for " +
-                        "details", GPU_ERROR
+                        "details"
             )
             Log.e(
                 TAG,
@@ -88,24 +72,17 @@ class HandLandmarksRepository@Inject constructor(
         }
     }
 
-
-    // Run hand hand landmark using MediaPipe Hand Landmarker API
     @VisibleForTesting
     fun detectAsync(mpImage: MPImage, frameTime: Long) {
         handLandmarker?.detectAsync(mpImage, frameTime)
-        // As we're using running mode LIVE_STREAM, the landmark result will
-        // be returned in returnLivestreamResult function
     }
 
-
-    // Return the landmark result to this HandLandmarkerHelper's caller
     private fun returnLivestreamResult(
         result: HandLandmarkerResult,
         input: MPImage
     ) {
         val finishTimeMs = SystemClock.uptimeMillis()
         val inferenceTime = finishTimeMs - result.timestampMs()
-        println("INFERENCE TIME HAND: $inferenceTime")
         updateHands(
             HandResultBundle(
                 result,
@@ -125,15 +102,13 @@ class HandLandmarksRepository@Inject constructor(
         }
     }
 
-    // Return errors thrown during detection to this HandLandmarkerHelper's
-    // caller
     private fun returnLivestreamError(error: RuntimeException) {
         onError(
             error.message ?: "An unknown error has occurred"
         )
     }
 
-    private fun onError(error: String, errorCode: Int = OTHER_ERROR) {
+    private fun onError(error: String) {
         println("ERROR APP: $error")
     }
 

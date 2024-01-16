@@ -3,10 +3,7 @@ package com.grandefirano.signtalk.landmarks
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 
 fun List<NormalizedLandmark>.dropIrises(): List<NormalizedLandmark> {
-    println("WRONGGGGGGGGG ${this.size}")
-    val ren = take(468)
-    println("WRONGGGGGGGGG ${ren.size}")
-    return ren
+    return take(468)
 }
 
 fun List<NormalizedLandmark>.toXYZVisibility(): List<XYZVKeypoints> {

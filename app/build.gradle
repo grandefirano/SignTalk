@@ -59,7 +59,7 @@ project.ext.ASSET_DIR = projectDir.toString() + '/src/main/assets'
 apply from: 'download_tasks.gradle'
 
 dependencies {
-// Kotlin lang
+    // Kotlin lang
     implementation 'androidx.core:core-ktx:1.8.0'
 
     // App compat and UI things

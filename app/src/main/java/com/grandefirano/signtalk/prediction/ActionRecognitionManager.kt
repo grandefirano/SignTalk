@@ -1,6 +1,5 @@
 package com.grandefirano.signtalk.prediction
 
-import android.os.SystemClock
 import com.grandefirano.signtalk.landmarks.LandmarksManager
 import com.grandefirano.signtalk.landmarks.XYZKeypoints
 import com.grandefirano.signtalk.landmarks.flattenXYZ
@@ -17,11 +16,9 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class GetUpperBodyLandmarksUseCase @Inject constructor(
+class UpperBodyKeypointsAggregator @Inject constructor(
     private val landmarksManager: LandmarksManager
 ) {
-    private var counterXX = 0
-    private var counterXXSaved = 0L
     private var lastConsumedFrame = ConsumedFrames(0, 0)
 
     operator fun invoke(): Flow<List<XYZKeypoints>> {
@@ -29,35 +26,12 @@ class GetUpperBodyLandmarksUseCase @Inject constructor(
             landmarksManager.handLandmarks,
             landmarksManager.poseLandmarks
         ) { hand, pose ->
-
-            val finishTimeMs = SystemClock.uptimeMillis()
-            //TODO test if frames are not lost here
-            val newXX = finishTimeMs / 1000
-            if (counterXXSaved == newXX) {
-                counterXX++
-            } else {
-                println("KNOW COMBINE FFFF TIME IN SECCCC $counterXXSaved  frames: $counterXX")
-                counterXX = 0
-                counterXXSaved = newXX
-            }
-            //println("NOW COMBINE ")
-            println("Frame hand ${hand.frameNumber}")
-            println("Frame pose ${pose.frameNumber}")
             CombinedLandmarks(hand, pose)
         }.filter {
             val isEveryFrameUpdated = isEveryFrameUpdated(it)
             if (isEveryFrameUpdated) updateLastConsumed(it)
-            println("ZZZ COMB2  $isEveryFrameUpdated")
             isEveryFrameUpdated
         }.map { combinedLandmarks ->
-            println("ZZZ COMB3")
-            println("NOWYY ONLANDMARK UPDATED")
-            println(
-                "Frame Combined: \n" +
-                        "Combined Frame Hand: ${combinedLandmarks.hand.frameNumber}: ${combinedLandmarks.hand.handResultBundle?.timeStampFinish} \n" +
-                        //"Combined Frame Face: ${it.face.frameNumber}: ${it.face.faceResultBundle?.timeStampFinish} \n" +
-                        "Combined Frame Pose: ${combinedLandmarks.pose.frameNumber}: ${combinedLandmarks.pose.poseResultBundle?.timeStampFinish}"
-            )
             extractUpperBodyKeypoints(combinedLandmarks)
         }
     }
@@ -68,7 +42,6 @@ class GetUpperBodyLandmarksUseCase @Inject constructor(
 
     private fun updateLastConsumed(combinedLandmarks: CombinedLandmarks) {
         combinedLandmarks.let {
-            println("ZZZ COMB4444")
             lastConsumedFrame = ConsumedFrames(
                 handConsumed = it.hand.frameNumber,
                 poseConsumed = it.pose.frameNumber
@@ -80,7 +53,7 @@ class GetUpperBodyLandmarksUseCase @Inject constructor(
 @Singleton
 class ActionRecognitionManager @Inject constructor(
     private val actionPredictionManager: ActionPredictionManager,
-    private val getUpperBodyLandmarksUseCase: GetUpperBodyLandmarksUseCase,
+    private val upperBodyKeypointsAggregator: UpperBodyKeypointsAggregator,
 ) {
     val recognizedElements: StateFlow<List<String>> =
         actionPredictionManager.recognizedSentences
@@ -88,9 +61,7 @@ class ActionRecognitionManager @Inject constructor(
     private val lastSequence = mutableListOf<List<Float>>()
 
     suspend fun startRecognition() {
-        println("NOWYY ACTION RECOGNITION")
-        getUpperBodyLandmarksUseCase().collect {
-            println("NOWYY ONLANDMARK")
+        upperBodyKeypointsAggregator().collect {
             onLandmarkUpdated(it)
         }
     }
@@ -99,14 +70,12 @@ class ActionRecognitionManager @Inject constructor(
 
         updateLastSequence(combinedLandmarks)
         if (lastSequence.size == 23) {
-            println("JAKUB1222 ${lastSequence.size}")
             actionPredictionManager.predict(lastSequence)
         }
     }
 
     private fun updateLastSequence(landmarks: List<XYZKeypoints>) {
         val keypointArray = landmarks.normalize().flattenXYZ()
-        println("TESTTT KEYPOINT ARRAY ${keypointArray.size} $keypointArray")
         lastSequence.add(keypointArray)
         if (lastSequence.size > 23) lastSequence.removeAt(0)
 
@@ -131,20 +100,7 @@ fun extractUpperBodyKeypoints(landmarks: CombinedLandmarks): List<XYZKeypoints> 
         filterPoseLandmarks.contains(index).not()
     }.let { if (it.isNullOrEmpty()) List(23) { XYZKeypoints(0f, 0f, 0f) } else it }
     val handResult = landmarks.hand.handResultBundle?.results.extractHandsXYZKeypoints()
-    val leftHand = handResult.first//.flattenXYZ()
-    val rightHand = handResult.second//.flattenXYZ()
-    val combinedLandmarks = pose + leftHand + rightHand
-
-    if (leftHand.size != 21) {
-        println("WRONGGGG left hand ${leftHand.size}")
-    }
-    if (rightHand.size != 21) {
-        println("WRONGGGG right hand ${rightHand.size}")
-    }
-    if (pose.size != 23) {
-        println("WRONGGGG pose ${pose.size}")
-    }
-    println("TESTTT hand RIGHT $rightHand")
-    println("TESTTT hand LEFT $leftHand")
-    return combinedLandmarks
+    val leftHand = handResult.first
+    val rightHand = handResult.second
+    return pose + leftHand + rightHand
 }
