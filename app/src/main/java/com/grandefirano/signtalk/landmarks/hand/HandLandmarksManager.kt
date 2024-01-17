@@ -10,18 +10,19 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
-import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.GPU_ERROR
-import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.OTHER_ERROR
+import com.grandefirano.signtalk.landmarks.LandmarksManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class HandLandmarksManager@Inject constructor(
     @ApplicationContext val context: Context,
-) {
-    val handLandmarks: MutableStateFlow<HandLandmarksResult> =
+):LandmarksManager<HandLandmarksResult> {
+    private val _landmarks: MutableStateFlow<HandLandmarksResult> =
         MutableStateFlow(initHandLandmarkerResultWrapper())
+    override val landmarks: StateFlow<HandLandmarksResult> = _landmarks
     private var handLandmarker: HandLandmarker? = null
 
     fun clearHandLandmarker() {
@@ -32,7 +33,7 @@ class HandLandmarksManager@Inject constructor(
         return handLandmarker == null
     }
 
-    fun setupHandLandmarker() {
+    override fun setupLandmarker() {
         val baseOptionBuilder = BaseOptions.builder()
         baseOptionBuilder.setDelegate(Delegate.CPU)
         baseOptionBuilder.setModelAssetPath(MP_HAND_LANDMARKER_TASK)
@@ -73,7 +74,7 @@ class HandLandmarksManager@Inject constructor(
     }
 
     @VisibleForTesting
-    fun detectAsync(mpImage: MPImage, frameTime: Long) {
+    override fun detectAsync(mpImage: MPImage, frameTime: Long) {
         handLandmarker?.detectAsync(mpImage, frameTime)
     }
 
@@ -95,7 +96,7 @@ class HandLandmarksManager@Inject constructor(
     }
 
     private fun updateHands(handResultBundle: HandResultBundle) {
-        handLandmarks.update {
+        _landmarks.update {
             it.withNewLandmark(
                 handResultBundle
             )

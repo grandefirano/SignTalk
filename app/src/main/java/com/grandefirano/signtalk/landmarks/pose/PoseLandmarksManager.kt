@@ -10,23 +10,24 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
-import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.GPU_ERROR
-import com.grandefirano.signtalk.landmarks.LandmarksManager.Companion.OTHER_ERROR
+import com.grandefirano.signtalk.landmarks.LandmarksManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class PoseLandmarksManager @Inject constructor(
     @ApplicationContext val context: Context,
-) {
+):LandmarksManager<PoseLandmarksResult> {
 
-    val poseLandmarks: MutableStateFlow<PoseLandmarksResult> =
+    private val _landmarks: MutableStateFlow<PoseLandmarksResult> =
         MutableStateFlow(initPoseLandmarkerResultWrapper())
+    override val landmarks:StateFlow<PoseLandmarksResult> = _landmarks
     private var poseLandmarker: PoseLandmarker? = null
 
     init {
-        setupPoseLandmarker()
+        setupLandmarker()
     }
 
     fun clearPoseLandmarker() {
@@ -38,7 +39,7 @@ class PoseLandmarksManager @Inject constructor(
         return poseLandmarker == null
     }
 
-    fun setupPoseLandmarker() {
+    override fun setupLandmarker() {
         val baseOptionBuilder = BaseOptions.builder()
         baseOptionBuilder.setDelegate(Delegate.CPU)
 
@@ -84,7 +85,7 @@ class PoseLandmarksManager @Inject constructor(
     }
 
     @VisibleForTesting
-    fun detectAsync(mpImage: MPImage, frameTime: Long) {
+    override fun detectAsync(mpImage: MPImage, frameTime: Long) {
         poseLandmarker?.detectAsync(mpImage, frameTime)
     }
 
@@ -108,7 +109,7 @@ class PoseLandmarksManager @Inject constructor(
     }
 
     private fun updatePose(poseResultBundle: PoseResultBundle) {
-        poseLandmarks.update {
+        _landmarks.update {
             it.withNewLandmark(
                 poseResultBundle = poseResultBundle
             )

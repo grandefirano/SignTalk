@@ -1,6 +1,6 @@
 package com.grandefirano.signtalk.prediction
 
-import com.grandefirano.signtalk.landmarks.LandmarksManager
+import com.grandefirano.signtalk.landmarks.CombinedLandmarksManager
 import com.grandefirano.signtalk.landmarks.XYZKeypoints
 import com.grandefirano.signtalk.recognition.CombinedLandmarks
 import com.grandefirano.signtalk.recognition.ConsumedFrames
@@ -13,14 +13,14 @@ import javax.inject.Inject
 
 
 class UpperBodyKeypointsAggregator @Inject constructor(
-    private val landmarksManager: LandmarksManager
+    private val combinedLandmarksManager: CombinedLandmarksManager
 ) {
     private var lastConsumedFrame = ConsumedFrames(0, 0)
 
     operator fun invoke(): Flow<List<XYZKeypoints>> {
         return combine(
-            landmarksManager.handLandmarks,
-            landmarksManager.poseLandmarks
+            combinedLandmarksManager.handLandmarks,
+            combinedLandmarksManager.poseLandmarks
         ) { hand, pose ->
             CombinedLandmarks(hand, pose)
         }.filter {

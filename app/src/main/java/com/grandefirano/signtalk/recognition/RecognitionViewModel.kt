@@ -3,7 +3,7 @@ package com.grandefirano.signtalk.recognition
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.grandefirano.signtalk.landmarks.LandmarksManager
+import com.grandefirano.signtalk.landmarks.CombinedLandmarksManager
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarksResult
 import com.grandefirano.signtalk.landmarks.pose.PoseLandmarksResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecognitionViewModel @Inject constructor(
-    private val landmarksManager: LandmarksManager,
+    private val combinedLandmarksManager: CombinedLandmarksManager,
     private val actionRecognitionManager: ActionRecognitionManager,
     private val staticRecognitionManager: StaticRecognitionManager,
 ) : ViewModel() {
@@ -28,8 +28,8 @@ class RecognitionViewModel @Inject constructor(
     private var currentRecognitionJob: Job? = null
     val backgroundExecutor: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
 
-    val handLandmarks: StateFlow<HandLandmarksResult> = landmarksManager.handLandmarks
-    val poseLandmarks: StateFlow<PoseLandmarksResult> = landmarksManager.poseLandmarks
+    val handLandmarks: StateFlow<HandLandmarksResult> = combinedLandmarksManager.handLandmarks
+    val poseLandmarks: StateFlow<PoseLandmarksResult> = combinedLandmarksManager.poseLandmarks
 
     private val lastRecognizedStaticElement = staticRecognitionManager.lastRecognizedElement
     private val lastRecognizedActionElement = actionRecognitionManager.lastRecognizedElement
@@ -62,16 +62,16 @@ class RecognitionViewModel @Inject constructor(
 
     fun setupLandmarkerIfClosed() {
         backgroundExecutor.execute {
-            landmarksManager.setupLandmarkerIfClosed()
+            combinedLandmarksManager.setupLandmarkerIfClosed()
         }
     }
 
     fun cleanLandmarker() {
-        backgroundExecutor.execute { landmarksManager.cleanLandmarker() }
+        backgroundExecutor.execute { combinedLandmarksManager.cleanLandmarker() }
     }
 
     fun detectCombinedLandmarks(imageProxy: ImageProxy) {
-        landmarksManager.detectCombinedLandmarks(imageProxy)
+        combinedLandmarksManager.detectCombinedLandmarks(imageProxy)
     }
 
     fun shutDownExecutor() {

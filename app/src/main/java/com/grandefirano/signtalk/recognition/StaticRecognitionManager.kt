@@ -1,7 +1,7 @@
 package com.grandefirano.signtalk.recognition
 
 import androidx.compose.runtime.mutableStateListOf
-import com.grandefirano.signtalk.landmarks.LandmarksManager
+import com.grandefirano.signtalk.landmarks.CombinedLandmarksManager
 import com.grandefirano.signtalk.landmarks.XYZKeypoints
 import com.grandefirano.signtalk.landmarks.flattenXYZ
 import com.grandefirano.signtalk.landmarks.hand.HandLandmarksResult
@@ -16,11 +16,11 @@ import javax.inject.Singleton
 
 @Singleton
 class StaticRecognitionManager @Inject constructor(
-    landmarksManager: LandmarksManager,
+    combinedLandmarksManager: CombinedLandmarksManager,
     private val staticPredictionManager: StaticPredictionManager,
 ) {
     private val handLandmarks: StateFlow<HandLandmarksResult> =
-        landmarksManager.handLandmarks
+        combinedLandmarksManager.handLandmarks
 
     private val _recognizedElements: MutableStateFlow<MutableList<String>> =
         MutableStateFlow(mutableStateListOf())

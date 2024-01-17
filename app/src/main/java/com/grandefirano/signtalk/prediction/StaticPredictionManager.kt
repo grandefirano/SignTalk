@@ -1,8 +1,8 @@
 package com.grandefirano.signtalk.prediction
 
 import com.grandefirano.signtalk.prediction.dictionary.DictionaryProvider
-import com.grandefirano.signtalk.prediction.dictionary.Interpreter
-import com.grandefirano.signtalk.prediction.dictionary.PredictionInterpreterProvider
+import com.grandefirano.signtalk.prediction.interpreter.PredictionInterpreterProvider
+import com.grandefirano.signtalk.prediction.interpreter.StaticInterpreter
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import javax.inject.Inject
@@ -12,11 +12,11 @@ import javax.inject.Singleton
 class StaticPredictionManager @Inject constructor(
     dictionaryProvider: DictionaryProvider,
     interpreterProvider: PredictionInterpreterProvider,
-) : PredictionManager {
+) : PredictionManager<Float> {
     private val translationChoice: TranslationChoice = TranslationChoice.PJM_POLISH
     private val isAction: Boolean = false
-    private val interpreter: Interpreter =
-        interpreterProvider.getPredictionInterpreter(translationChoice, isAction)
+    private val interpreter: StaticInterpreter =
+        interpreterProvider.getStaticInterpreter(translationChoice)
     private val dictionaryLanguage: List<String> =
         dictionaryProvider.getDictionary(translationChoice, isAction)
 
@@ -35,13 +35,7 @@ class StaticPredictionManager @Inject constructor(
     }
 }
 
-interface PredictionManager {
-    fun predict(input: List<Float>): Prediction?
-}
 
-data class Prediction(
-    val value: String,
-    val possibility: Float
-)
+
 
 

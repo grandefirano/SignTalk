@@ -2,11 +2,10 @@ package com.grandefirano.signtalk.prediction
 
 import androidx.compose.runtime.mutableStateListOf
 import com.grandefirano.signtalk.prediction.dictionary.DictionaryProvider
-import com.grandefirano.signtalk.prediction.dictionary.Interpreter
-import com.grandefirano.signtalk.prediction.dictionary.PredictionInterpreterProvider
+import com.grandefirano.signtalk.prediction.interpreter.ActionInterpreter
+import com.grandefirano.signtalk.prediction.interpreter.PredictionInterpreterProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import javax.inject.Inject
@@ -16,10 +15,10 @@ import javax.inject.Singleton
 class ActionPredictionManager @Inject constructor(
     private val dictionaryProvider: DictionaryProvider,
     private val interpreterProvider: PredictionInterpreterProvider,
-) {
+):PredictionManager<List<Float>> {
 
-    private var interpreter: Interpreter =
-        interpreterProvider.getPredictionInterpreter(TranslationChoice.PJM_POLISH,true)
+    private var interpreter: ActionInterpreter =
+        interpreterProvider.getActionInterpreter(TranslationChoice.PJM_POLISH)
 
     private var dictionaryLanguage: List<String> =
         dictionaryProvider.getDictionary(TranslationChoice.PJM_POLISH,true)
@@ -27,23 +26,18 @@ class ActionPredictionManager @Inject constructor(
     private val _recognizedSentences: MutableStateFlow<MutableList<String>> =
         MutableStateFlow(mutableStateListOf())
     val recognizedSentences: StateFlow<List<String>> = _recognizedSentences
-    private val _lastRecognizedElement: MutableStateFlow<String?> =
-        MutableStateFlow(null)
-    val lastRecognizedElement: StateFlow<String?> = _lastRecognizedElement
-    private val threshold = 0.8
 
-    private val lastPredictions = mutableListOf<Int>()
-    fun predict(sequence: List<List<Float>>) {
-        val floatArray = sequence.toFloatArray()
+    override fun predict(input: List<List<Float>>): Prediction? {
+        val floatArray = input.toFloatArray()
         val inputSize = intArrayOf(1, 23, 195)
         val inputFeature = TensorBuffer.createFixedSize(inputSize, DataType.FLOAT32)
         inputFeature.loadArray(floatArray, inputSize)
         val outputFeature = interpreter.interpret(inputFeature)
         val list = outputFeature.floatArray.toList()
         val maxIndex = list.argmax()
-        maxIndex?.let {
-            updateLastPrediction(maxIndex)
-            checkLastPredictions(maxIndex, list)
+        return maxIndex?.let {
+            val possibility = list[maxIndex]
+            Prediction(dictionaryLanguage[maxIndex], possibility)
         }
     }
 
@@ -57,36 +51,4 @@ class ActionPredictionManager @Inject constructor(
 *
 */
 
-    private fun updateLastPrediction(prediction: Int) {
-        lastPredictions.add(prediction)
-        if (lastPredictions.size > 5) lastPredictions.removeAt(0)
-    }
-
-    private fun checkLastPredictions(currentIndex: Int, list: List<Float>) {
-        var isEqual = true
-        lastPredictions.forEach {
-            if (currentIndex != it) {
-                isEqual = false
-                return@forEach
-            }
-        }
-        if (isEqual) {
-            if (list[currentIndex] > threshold) {
-                val currentSentence = dictionaryLanguage[currentIndex]
-                if (_recognizedSentences.value.size > 0) {
-
-                    if (currentSentence != _recognizedSentences.value.last()) {
-                        addSentenceItem(currentSentence)
-                    }
-                } else {
-                    addSentenceItem(currentSentence)
-                }
-            }
-        }
-    }
-
-    private fun addSentenceItem(currentSentence: String) {
-        _recognizedSentences.update { it.apply { add(currentSentence) } }
-        _lastRecognizedElement.value = currentSentence
-    }
 }
