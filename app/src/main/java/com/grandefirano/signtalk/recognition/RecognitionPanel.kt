@@ -49,7 +49,7 @@ import com.grandefirano.signtalk.ui.theme.SignTalkTheme
 fun RecognitionPanel(viewModel: RecognitionViewModel = hiltViewModel()) {
     val recognizedSentences by viewModel.allRecognizedElements.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
-    var isActionRecognitionMode by remember { mutableStateOf(true) }
+    var isActionRecognitionMode by remember { mutableStateOf(false) }
     LaunchedEffect(isActionRecognitionMode) {
         viewModel.switchRecognitionModel(isActionRecognitionMode, coroutineScope)
     }
